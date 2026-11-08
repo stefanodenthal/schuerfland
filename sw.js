@@ -1,7 +1,7 @@
 // Schürfland App: Offline-Speicher
 // Seite: erst Netz (damit Updates sofort ankommen), sonst Kopie aus dem Speicher.
 // Schriften, Icons usw.: erst Speicher, sonst Netz.
-const VERSION = '4.5.2-70b3be32';
+const VERSION = '4.5.3-577b4ef7';
 const CACHE = 'schuerfland-' + VERSION;
 const ASSETS = ["./","./index.html","./fonts.css","./manifest.webmanifest","./fonts/LilitaOne-400-latin-ext.woff2","./fonts/LilitaOne-400-latin.woff2","./fonts/Nunito-700-latin-ext.woff2","./fonts/Nunito-700-latin.woff2","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-maskable-512.png","./icons/apple-touch-icon.png","./icons/favicon-32.png"];
 
