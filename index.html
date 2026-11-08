@@ -187,6 +187,33 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
 @media (max-width:350px){#clock .clk{font-size:12px;padding:3px 8px}}
 @media (max-height:620px){.logo{font-size:40px}.how{font-size:13.5px;gap:5px 10px}.card{gap:9px;padding:16px 16px}.big{font-size:23px;padding:10px 32px}}
 @media (max-width:350px){#lagerBtn{padding:4px 8px}}
+/* 4.5: Namen, Rangliste, Beim Verlassen */
+.sel{-webkit-user-select:text;user-select:text}
+.form{width:100%;display:flex;flex-direction:column;gap:4px;text-align:left}
+.form label{font-weight:900;font-size:15px;margin-top:4px}.form label small{font-weight:700;color:var(--muted);font-size:13px}
+.txt{width:100%;box-sizing:border-box;min-height:44px;border-radius:12px;border:2px solid #cbbf9f;background:#fff;padding:8px 10px;font:800 16px var(--f-body);color:var(--ink);-webkit-user-select:text;user-select:text}
+.txt:focus{outline:3px solid #1e6fd9;outline-offset:1px;border-color:#1e6fd9}
+.form .msg,.xfer .msg{font-weight:800;font-size:14px;line-height:1.35;min-height:1px}.form .msg.bad{color:#9b2a1f}.form .msg.ok{color:#1f6a3a}
+.form .row2{display:flex;gap:8px;margin-top:4px}.form .row2 button{flex:1}
+.opts2{padding:6px 0 4px}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}.seg .pill{flex:1 1 auto;min-height:44px}
+.mrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}.mrow button{flex:1 1 40%}
+.lnk{text-decoration:none;justify-content:center;min-height:44px;box-sizing:border-box}
+.rhd{width:100%}.rhd h2{flex:1;text-align:left}
+.x.spin{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.rwrap{width:100%}
+.rlist{width:100%;display:flex;flex-direction:column;gap:3px;text-align:left}
+.rrow{display:grid;grid-template-columns:30px minmax(0,1fr) 24px auto;gap:2px 6px;align-items:center;background:#f3ead3;border-radius:10px;padding:5px 8px;font-variant-numeric:tabular-nums}
+.rrow .rp{font-family:var(--f-display);font-size:17px;color:#8a4d12;text-align:center}
+.rrow .rn{min-width:0;line-height:1.15}.rrow .rn b{display:block;font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .rn small,.rrow .rs small{display:block;font-size:12px;color:var(--muted);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rrow .rt{font-size:17px;text-align:center}.rrow .rs{text-align:right;line-height:1.15}.rrow .rs b{font-size:15px;font-weight:900}
+.rrow .rs .coin{width:.8em;height:.8em;margin-right:.15em}
+.rrow.me{background:#ffe7a8;box-shadow:inset 0 0 0 2px #e2902b}
+.rrow.pin{position:sticky;bottom:70px;margin-top:6px;grid-template-columns:30px minmax(0,1fr);z-index:1}
+.rlist.sm .rrow{padding:4px 8px}
+.rinfo{background:#f3ead3;border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;text-align:center}.rinfo.bad{background:#ffe3dc;color:#8f2a20}
+.rbtn{display:flex;gap:8px;flex-wrap:wrap;width:100%;justify-content:center}.rbtn button{flex:1 1 40%}
 </style>
 </head>
 <body>
@@ -194,7 +221,7 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
   <canvas id="cv"></canvas>
   <div id="hud" hidden>
     <div class="row"><div class="chip" id="coins"><span class="coin"></span>0</div><div id="saved" role="status" aria-label="Gespeichert">✓<span class="svt"> Gespeichert</span></div><div class="chip" id="bag">🎒 0/20</div><button class="chip" id="lagerBtn" hidden aria-label="Lager und Produktion">📦 0</button>
-      <button id="gear" aria-label="Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="4.5" stroke-dasharray="3.1 3.2"/><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.8"/></svg></button></div>
+      <button id="gear" aria-label="Pause und Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="4.5" stroke-dasharray="3.1 3.2"/><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.8"/></svg></button></div>
     <div id="goal"></div>
     <button id="clock" aria-label="Uhrzeit und Jahreszeit"><span class="chip clk" id="clockTxt">Tag 1</span></button>
   </div>
@@ -206,7 +233,7 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
 </div>
 
 <script>
-window.SFL_APP = { version: "4.4.2-afb2b0ea", standalone: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true };
+window.SFL_APP = { version: "4.5-fda35ce8", standalone: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true };
 </script>
 <script>
 (() => {
@@ -217,7 +244,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.4.2', SAVE_V = 4.4;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5', SAVE_V = 4.4;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -250,7 +277,7 @@ let META = META0(), metaFix = false;   // metaFix: reparierter Meta-Stand wird e
     const seen = new Set(), isl = [...(Array.isArray(r.islands) ? r.islands : []), ...extra].filter(i => isO(i) && Number.isInteger(i.n) && i.n > 0 && ['nebel', 'eis', 'dschungel'].includes(i.theme) && !seen.has(i.n) && seen.add(i.n)).map(i => ({ ...i, seed: (Number(i.seed) >>> 0) || 1, mirror: !!i.mirror, name: String(i.name || '').slice(0, 30) || 'Insel ' + i.n })).sort((a, b) => a.n - b.n);
     const nn = v => Math.max(0, Math.floor(Number(v) || 0)), got = {};
     if (isO(r.got)) for (const k of Object.keys(r.got)) got[k] = nn(r.got[k]);
-    META = { ...META0(), ...r, islands: isl, mp: nn(r.mp), mpAll: nn(r.mpAll), boost: isO(r.boost) ? r.boost : {}, active: Number.isInteger(r.active) ? r.active : 0, ship: !!r.ship || isl.length > 0, next: Math.max(nn(r.next), 1, ...isl.map(i => i.n + 1)), got };
+    META = { ...META0(), ...r, islands: isl, mp: nn(r.mp), mpAll: nn(r.mpAll), don: nn(r.don), boost: isO(r.boost) ? r.boost : {}, active: Number.isInteger(r.active) ? r.active : 0, ship: !!r.ship || isl.length > 0, next: Math.max(nn(r.next), 1, ...isl.map(i => i.n + 1)), got };
     if (extra.length || str === null || !isO(JSON.parse(str || 'null'))) metaFix = true;
   } catch (e) { META = META0(); }
 })();
@@ -281,11 +308,16 @@ function shade(h, k) { const c = rgbOf(h), f = k < 0 ? 0 : 255, a = Math.min(1, 
 function rgba(h, a) { const c = rgbOf(h); return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
 
 // ---------- Einstellungen ----------
-let SET = { sound: true, vib: true, gfx: 'hoch', sfx: 0.8, amb: 0.6, mus: 0.35, wetter: true, calm: false, tagnacht: true, jahr: true };
+let SET = { sound: true, vib: true, gfx: 'hoch', sfx: 0.8, amb: 0.6, mus: 0.35, wetter: true, calm: false, tagnacht: true, jahr: true, leave: 'pause', pname: '', dorf: '' };
+// 4.5: Spielername (2–16 Zeichen) und Dorfname (2–20): Buchstaben (auch ÄÖÜäöüß), Ziffern, Leerzeichen, Punkt, Unterstrich, Bindestrich
+const NAME_RE = /^[A-Za-z0-9ÄÖÜäöüß ._-]+$/;
+const cleanName = (v, max) => { const t = String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); return t.length >= 2 && t.length <= max && NAME_RE.test(t) ? t : ''; };
 const vol01 = (v, d) => { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : d; };
-try { const r = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (r && typeof r === 'object') SET = { ...r, sound: r.sound !== false, vib: r.vib !== false, gfx: r.gfx === 'niedrig' ? 'niedrig' : 'hoch', sfx: vol01(r.sfx, 0.8), amb: vol01(r.amb, 0.6), mus: vol01(r.mus, 0.35), wetter: r.wetter !== false, calm: r.calm === true, tagnacht: r.tagnacht !== false, jahr: r.jahr !== false }; } catch (e) {}
+try { const r = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (r && typeof r === 'object') SET = { ...r, sound: r.sound !== false, vib: r.vib !== false, gfx: r.gfx === 'niedrig' ? 'niedrig' : 'hoch', sfx: vol01(r.sfx, 0.8), amb: vol01(r.amb, 0.6), mus: vol01(r.mus, 0.35), wetter: r.wetter !== false, calm: r.calm === true, tagnacht: r.tagnacht !== false, jahr: r.jahr !== false, leave: r.leave === 'weiter' ? 'weiter' : 'pause', pname: cleanName(r.pname, 16), dorf: cleanName(r.dorf, 20), rangAsk: r.rangAsk === true }; } catch (e) {}
 function saveSet() { try { localStorage.setItem(SKEY, JSON.stringify(SET)); } catch (e) {} }
 const LOW = () => SET.gfx === 'niedrig';
+// 4.5: Beim Verlassen pausiert das Spiel (Standard). „Weiterarbeiten“ ist der alte Offline-Verdienst (höchstens 2 Std).
+const PAUSE = () => SET.leave !== 'weiter';
 // 4.4 Leistungsautomatik: läuft das Spiel auf einem langsamen Gerät länger ruckelig, wird teure Zierde vorübergehend ausgedünnt
 // (LITE 1) und, wenn das nicht reicht, die Leinwand mit geringerer Auflösung gezeichnet (LITE 2 und 3, RS = Auflösungsfaktor)
 let LITE = 0, RS = 1;
@@ -344,11 +376,11 @@ const RES = {
 };
 const FOODS = ['raeucherfisch', 'brot', 'fisch'];
 const NODE = {
-  tree:      { res: 'holz',      amount: 4, tool: 'axe',  tier: 1, regrow: 9,  r: 18, tree: true },
-  tanne:     { res: 'holz',      amount: 5, tool: 'axe',  tier: 1, regrow: 10, r: 17, tree: true },
-  palme:     { res: 'holz',      amount: 3, tool: 'axe',  tier: 1, regrow: 9,  r: 15, tree: true },
-  eiche:     { res: 'hartholz',  amount: 4, tool: 'axe',  tier: 2, regrow: 14, r: 20, tree: true },
-  mondbaum:  { res: 'mondholz',  amount: 3, tool: 'axe',  tier: 5, regrow: 30, r: 19, tree: true },
+  tree:      { res: 'holz',      amount: 4, tool: 'axe',  tier: 1, regrow: 30, r: 18, tree: true },
+  tanne:     { res: 'holz',      amount: 5, tool: 'axe',  tier: 1, regrow: 33, r: 17, tree: true },
+  palme:     { res: 'holz',      amount: 3, tool: 'axe',  tier: 1, regrow: 30, r: 15, tree: true },
+  eiche:     { res: 'hartholz',  amount: 4, tool: 'axe',  tier: 2, regrow: 45, r: 20, tree: true },
+  mondbaum:  { res: 'mondholz',  amount: 3, tool: 'axe',  tier: 5, regrow: 90, r: 19, tree: true },
   rock:      { res: 'stein',     amount: 4, tool: 'pick', tier: 1, regrow: 10, r: 16 },
   eisen:     { res: 'eisen',     amount: 5, tool: 'pick', tier: 2, regrow: 14, r: 17 },
   gold:      { res: 'gold',      amount: 5, tool: 'pick', tier: 3, regrow: 18, r: 17 },
@@ -421,11 +453,11 @@ const PLATES = [
   { id: 'saege',     x: 110,  y: 2710, req: 'bruecke', cost: { holz: 30, stein: 10 }, title: 'Sägewerk bauen', done: 'Holz aus dem Lager wird zu Brettern' },
   { id: 'waldsteg',  x: 62,   y: 1840, req: 'huette', cost: { bretter: 20, holz: 20 }, title: 'Waldbrücke bauen', done: 'Der Tannenwald ist offen!' },
   { id: 'haus1',     x: 950,  y: 2712, req: 'huette', opt: true, cost: { bretter: 30, stein: 40 }, title: 'Wohnhaus bauen', done: 'Platz für 2 weitere Helfer' },
-  { id: 'h_wiese',   x: 180,  y: 1640, req: 'saege', opt: true, cost: { bretter: 25, stein: 25 }, title: 'Sägebot bauen', done: 'Sammelt Holz von allein' },
+  { id: 'h_wiese',   x: 180,  y: 1640, req: 'saege', opt: true, cost: { bretter: 25, stein: 25 }, title: 'Sägebot bauen', done: 'Fällt Bäume auf der Wiese von allein' },
   { id: 'mine',      x: 450,  y: 770,  req: 'saege', cost: { bretter: 40, stein: 60 }, title: 'Minentor öffnen', done: 'Die Mine ist offen!' },
   { id: 'h_stein',   x: 95,   y: 1170, req: 'mine', opt: true, cost: { bretter: 40, stein: 50 }, title: 'Steinbrecher bauen', done: 'Bricht Stein von allein' },
   { id: 'ofen',      x: 270,  y: 2710, req: 'mine', cost: { stein: 50, bretter: 20 }, title: 'Schmelzofen bauen', done: 'Erz aus dem Lager wird zu Barren' },
-  { id: 'h_wald',    x: -470, y: 2060, req: 'ofen', opt: true, cost: { bretter: 40, eisenbarren: 12 }, title: 'Sägebot bauen', done: 'Sammelt Hartholz von allein' },
+  { id: 'h_wald',    x: -470, y: 2060, req: 'ofen', opt: true, cost: { bretter: 40, eisenbarren: 12 }, title: 'Sägebot bauen', done: 'Fällt Eichen und Tannen von allein' },
   { id: 'schacht',   x: 745,  y: 385,  req: 'ofen', cost: { bretter: 40, stein: 50, eisenbarren: 10 }, title: 'Tiefenmine öffnen', done: 'Der Schacht führt in die Tiefe!' },
   { id: 'ackersteg', x: 990,  y: 2786, req: 'schacht', cost: { bretter: 60, eisenbarren: 15 }, title: 'Ackersteg bauen', done: 'Das Ackerland ist offen!' },
   { id: 'muehle',    x: 955,  y: 2935, req: 'ackersteg', cost: { bretter: 50, stein: 40, weizen: 20 }, title: 'Mühle reparieren', done: 'Weizen wird zu Mehl' },
@@ -613,11 +645,13 @@ const HELP = {
   holz:    { name: 'Holzfäller',   info: 'Fällt Bäume und Kakteen',        costs: [120, 350, 900, 2200, 4500, 8000],  pal: { key: 'hz', body: '#d9693b', hat: '#3f9a3a', pants: '#5a4030' }, tool: 'axe', req: 'huette', kind: 'g' },
   berg:    { name: 'Bergarbeiter', info: 'Baut Stein und Erz ab',          costs: [300, 900, 2500, 6000, 10000, 16000], pal: { key: 'bg', body: '#8a7a68', hat: '#ffcf3a', pants: '#3e3a40', lamp: true }, tool: 'pick', req: 'huette', kind: 'g' },
   traeger: { name: 'Träger',       info: 'Holt Sammler-Puffer, bringt Waren zum Ziel', costs: [200, 600, 1800, 4000, 8000], pal: { key: 'tr', body: '#3c9b8f', hat: '#fff1c9', pants: '#33506a' }, tool: null, req: 'lager', kind: 'c' },
+  // 4.5: Der Förster pflanzt gefällte Bäume neu: ein Setzling wächst doppelt so schnell nach
+  foerster:{ name: 'Förster',      info: 'Pflanzt gefällte Bäume neu: wachsen doppelt so schnell', costs: [200, 700, 2000], pal: { key: 'fo', body: '#4f7d3a', hat: '#6b4a2a', pants: '#3e4a30' }, tool: 'spade', req: 'huette', kind: 'g' },
   bauer:   { name: 'Bauer',        info: 'Erntet Weizen auf den Feldern',  costs: [250, 800, 2000, 4500], pal: { key: 'ba', body: '#7aa83a', hat: '#e8c96a', pants: '#4a6a8a' }, tool: 'sickle', req: 'ackersteg', kind: 'g' },
   fischer: { name: 'Fischer',      info: 'Angelt am Fischersteg',          costs: [400, 1200, 3000, 6000], pal: { key: 'fi', body: '#3a6fb0', hat: '#ffd34d', pants: '#2a3a50' }, tool: 'rod', req: 'fischer', kind: 'g' },
   baecker: { name: 'Bäcker',       info: 'Mühle, Bäckerei oder Räucherei +50 %', costs: [500, 1500, 4000], pal: { key: 'bk', body: '#f3ead3', hat: '#ffffff', pants: '#6a5a4a' }, tool: null, req: 'muehle', kind: 'w' },
   schmied: { name: 'Schmied',      info: 'Öfen +40 %, verbessert nach und nach dein Werkzeug', costs: [800, 2500, 6000], pal: { key: 'sm', body: '#5a4a48', hat: '#2a2430', pants: '#3a3046' }, tool: 'hammer', req: 'tier2', kind: 'w' },
-  haendler:{ name: 'Händler',      info: 'Verkauft Überschuss 25 % teurer', costs: [1500, 5000, 12000], pal: { key: 'hd', body: '#8a3a6a', hat: '#e2a12a', pants: '#3a2a40' }, tool: null, req: 'tier3', kind: 'c' },
+  haendler:{ name: 'Händler',      info: 'Verkauft Überschuss 15 % teurer', costs: [1500, 5000, 12000], pal: { key: 'hd', body: '#8a3a6a', hat: '#e2a12a', pants: '#3a2a40' }, tool: null, req: 'tier3', kind: 'c' },
   vorarbeiter: { name: 'Vorarbeiter', info: 'Helfer in der Nähe +20 % schneller', costs: [2500, 8000], pal: { key: 'vo', body: '#e2483f', hat: '#ffcf3a', pants: '#3a3a4a' }, tool: null, req: 'tier3', kind: 'f' },
   // 4.3: Jede Maschine bekommt beim Bau ihren eigenen Arbeiter (kostenlos, zählt nicht als Helfer). Ohne ihn läuft sie nur halb so schnell.
   arbeiter: { name: 'Arbeiter', info: 'Bedient eine Maschine: volles Tempo, mit jeder Stufe schneller', costs: [], pal: { key: 'ar', body: '#c96a3e', hat: '#5a6070', pants: '#3e3a40' }, tool: 'hammer', req: 'saege', kind: 'o' },
@@ -665,7 +699,7 @@ const cpRewardTxt = f => CPREW[f / 10 - 1] || 'Alle Verkaufspreise +5 %';
 const KEEPS = [0, 25, 50, 100, 200, 500], TSELL = [0, 50, 100, 200, 500];
 // Besondere Verbesserungen, die es nur an der Werkbank eines Gebiets gibt (gelten dann überall)
 const SPEC = {
-  giess:   { reg: 'wiese',      name: 'Gießkanne',         costs: [80, 250, 700],      info: l => l ? 'Bäume wachsen ' + l * 20 + ' % schneller nach' : 'Bäume wachsen schneller nach' },
+  giess:   { reg: 'wiese',      name: 'Gießkanne',         costs: [80, 250, 700, 1800], info: l => l ? 'Bäume wachsen ' + l * 20 + ' % schneller nach' : 'Bäume wachsen schneller nach' },
   axtm:    { reg: 'wald',       name: 'Axt-Meisterschaft', costs: [150, 500, 1500],    info: l => l ? l * 20 + ' % Chance auf Extra-Holz' : 'Chance auf Extra-Holz beim Fällen' },
   hschule: { reg: 'wald',       name: 'Holzfäller-Schule', costs: [300, 900],          info: l => l ? 'Holzfäller ' + l * 25 + ' % schneller' : 'Deine Holzfäller arbeiten schneller' },
   spreng:  { reg: 'steinbruch', name: 'Sprengladung',      costs: [400, 1200, 3000],   info: l => l ? 'Knopf 💥 sprengt Felsen im Umkreis · alle ' + [0, 60, 45, 30][l] + ' s' : 'Sprengt eine ganze Felsgruppe auf einmal' },
@@ -677,6 +711,15 @@ const SPEC = {
   duenger: { reg: 'acker',      name: 'Dünger',            costs: [300, 900, 2400],    info: l => l ? 'Weizen wächst ' + l * 25 + ' % schneller' : 'Weizen wächst schneller nach' },
 };
 const OLD_LORE = [600, 1800];
+const HAENDLER = 1.15;   // 4.5: Händler verkauft Überschuss 15 % teurer (vorher 25 %), +2 % je Stufe
+// 4.5: Dorf verschönern: Münzen für Schmuck, der bleibt. Jede Stufe: +1 Einwohner und Helfer 2 % schneller. Höhere Stufen ab höherer Dorfstufe.
+const SCHMUCK = [
+  { name: 'Blumenbeete', cost: 1500, tier: 2 }, { name: 'Parkbänke', cost: 4000, tier: 2 },
+  { name: 'Laternen', cost: 10000, tier: 3 }, { name: 'Wimpelketten', cost: 25000, tier: 3 },
+  { name: 'Rosenhecken', cost: 60000, tier: 4 }, { name: 'Blumenwiesen', cost: 150000, tier: 4 },
+  { name: 'Festbeleuchtung', cost: 400000, tier: 5 }, { name: 'Prunkgärten', cost: 1000000, tier: 5 },
+];
+const GIESS = 0.2;   // je Stufe der Gießkanne wachsen Bäume 20 % schneller nach (4.5: vierte Stufe, zusammen 80 %)
 const PLAYER_PAL = { key: 'pl', body: '#2f6fb3', hat: '#ffcf3a', pants: '#2a3f60', lamp: true };
 const bagCap = l => 20 + (l - 1) * 10;
 
@@ -816,6 +859,7 @@ let booted = false, lastW = null;   // booted: Laden + Migration fertig; lastW: 
   if (S.done.expedition && !META.ship) { META.ship = true; metaFix = true; }
   // 4.3: Transport, Maschinen-Stapel, ein Arbeiter je Maschine, Erste Schritte
   S.trans = int(S.trans, 0, TRANS.length - 1, 0);
+  S.schmuck = int(S.schmuck, 0, SCHMUCK.length, 0);   // 4.5: Dorfschmuck (neues Feld, ältere Stände: 0)
   const buf2 = (b, mx) => { const o = {}; for (const k of Object.keys(obj(b))) { const v = Math.max(0, Math.floor(Number(b[k]) || 0)); if (!v) continue; if (!RES[k]) { keepAway('mbuf', k, v); continue; } o[k] = Math.min(v, mx); if (v > mx) stash(k, v - mx); } return o; };
   for (const id of Object.keys(BLD)) { const st = S.bld[id]; st.inb = buf2(st.inb, 200); st.outb = buf2(st.outb, 200); delete st.claim; }
   const usedN = new Set(S.helpers.map(c => c.name)), ops = [];
@@ -860,7 +904,7 @@ const blankSave = o => !doneN(o) && !(Number(o.coins) > 0) && !arr(o.helpers).le
 // Speichern mit Schutz: nie vor fertigem Laden, nie einen leeren Neuanfang von selbst, nie über einen fremden Stand mit mehr Fortschritt
 function save(show) {
   if (!booted) return;
-  S.lastSeen = Date.now(); S.meta = META; S.dn = DN.save();
+  S.lastSeen = Date.now(); S.meta = META; S.dn = DN.save(); S.nd = nodeSave();
   S.deep.at = deep ? deep.f : 0;
   for (const h of helpers) { h.cfg.x = Math.round(h.x); h.cfg.y = Math.round(h.y); h.cfg.reg = h.reg; h.cfg.load = h.load.slice(); }
   for (const o of ops) { o.cfg.x = o.atWork ? Math.round(o.x) : null; o.cfg.y = o.atWork ? Math.round(o.y) : null; }
@@ -1047,6 +1091,16 @@ const DECOR = [];
     if (TH.tile === 'nebel') { S2('wiese', 34, 'heide', 2); S2('wald', 24, 'heide', 2); S2('wiese', 3, 'moorTuempel', 1, 40); S2('steinbruch', 10, 'heide', 2); S2('wiese', 1, 'dolmen', 1, 50); }
     if (TH.tile === 'dschungel') { S2('wiese', 24, 'farn', 2); S2('wald', 30, 'farn', 2); S2('wald', 10, 'monstera', 1); S2('wiese', 8, 'rafflesia', 1); S2('acker', 6, 'monstera', 1); }
   }
+  // 4.5: Dorfschmuck: erscheint Stufe für Stufe an freien Plätzen im Dorf (nach aller anderen Deko, die liegt also wie bisher)
+  const sch = (lv, n, fn, rad) => dput(n, (x, y, Q) => ({ ...fn(x, y, Q), sch: lv }), rad);
+  sch(1, 6, (x, y, Q) => ({ t: 'bed', x, y, col: ['#ff8fb1', '#ffd34d', '#b9a7ff', '#fff6f0'][Math.floor(Q() * 4)] }), 26);
+  sch(2, 4, (x, y, Q) => ({ t: 'pbench', x, y, a: Q() < 0.5 ? 0 : 1 }), 24);
+  sch(3, 6, (x, y) => ({ t: 'lamp', x, y }), 14);
+  sch(4, 4, (x, y, Q) => ({ t: 'bunting', x: x - 70, y, x2: x + 70, y2: y + (Q() - 0.5) * 30 }), 30);
+  sch(5, 5, (x, y, Q) => ({ t: 'bush', x, y, r: 11 + Q() * 4, berry: true }), 20);
+  sch(6, 24, (x, y, Q) => ({ t: 'flowers', x, y, col: ['#fff6f0', '#ffd34d', '#ff8fb1', '#b9a7ff'][Math.floor(Q() * 4)], n: 3 + Math.floor(Q() * 4), sd: Q() * 100 }), 10);
+  sch(7, 8, (x, y) => ({ t: 'lamp', x, y }), 14);
+  sch(8, 8, (x, y, Q) => ({ t: 'bed', x, y, col: ['#ff8fb1', '#ffd34d', '#b9a7ff'][Math.floor(Q() * 3)] }), 26);
   const ord = t => t === 'patch' ? 0 : t === 'soil' ? 0.5 : t === 'wall' ? 2 : 1;
   DECOR.sort((a, b) => ord(a.t) - ord(b.t) || a.y - b.y);
 })();
@@ -1299,7 +1353,7 @@ const lampHead = () => sprite('lampHead', 8, 10, 4, 43.5, g => { g.fillStyle = '
 function worldLamps() {
   const tn = tierNow(), a = Math.min(1, litK * 1.6);
   for (const d of LAMPS) {
-    if ((d.tier && tn < d.tier) || !inView(d.x, d.y, 120)) continue;
+    if ((d.tier && tn < d.tier) || (d.sch && (S.schmuck || 0) < d.sch) || !inView(d.x, d.y, 120)) continue;
     addL('laterne', d.x, d.y, 100, 38, 1, 0.1);
     ctx.globalAlpha = a; blit(lampHead(), d.x, d.y); ctx.globalAlpha = 1;
   }
@@ -1327,6 +1381,7 @@ function drawShadows(list) {
     else if (k === 6) castShadow(o.x, o.y - 4, 80, 70);
     else if (k === 9) castShadow(o.x, o.y, 56, 150);
     else if (k === 10) castShadow(o.x, o.y + 12, 150, 84);
+    else if (k === 15) castShadow(o.x, o.y, 30, 46);
   }
 }
 // Licht und Tönung der Welt (über den 4.3-Anschluss worldLight): Teilchen der Jahreszeit, Lichtkarte, Glitzern auf dem Wasser, Leuchtturm
@@ -3199,7 +3254,8 @@ function obtainable(r) { const o = RAWOF[r]; if (!o) return canGet(r); return !!
 const tierNow = () => 1 + TIERS.filter(id => S.done[id]).length;
 const housesN = () => HOUSES.filter(id => S.done[id]).length;
 const helperCap = () => 3 + 2 * housesN() + 2 * (tierNow() - 1);
-const popNow = () => S.helpers.length + (S.done.huette ? 2 : 0) + 2 * housesN();
+const popNow = () => S.helpers.length + (S.done.huette ? 2 : 0) + 2 * housesN() + (S.schmuck || 0);
+const schmuckCost = () => { const x = SCHMUCK[S.schmuck || 0]; return x && tierNow() >= x.tier ? x.cost : null; };
 const paidAll = p => { const pd = S.paid[p.id] || {}; return Object.keys(p.cost).every(k => (pd[k] || 0) >= p.cost[k]); };
 const reqOk = p => (!p.pop || popNow() >= p.pop) && (!p.deep || S.deep.cp >= p.deep) && (!p.power || powerCap() >= p.power);
 const plateReady = p => paidAll(p) && reqOk(p);
@@ -3268,7 +3324,13 @@ const LSGN = MIRROR ? -1 : 1;
 const LSLOTS = [-62, -14, 34].map(dx => ({ x: LAGER.x + LSGN * dx, y: LAGER.y + 66, busy: 0, who: null }));
 const LPILES = [-82, -46, -10, 26, 62].map(dx => ({ x: LAGER.x + LSGN * dx, y: LAGER.y + 38 }));
 let soldAcc = 0;
-function sellFromLager(r, n) { if (RES[r].nosell) return 0; const v0 = sv(r), k = ltake(r, n); if (!k) return 0; const v = k * v0; S.coins += v; statU(r, k); soldAcc += v; mktSold(r, k); return v; }
+// 4.5: Große Mengen aus dem Lager drücken den Preis schon während des Verkaufs: sanft (ein Viertel wie Stück für Stück verkauft)
+// und nie unter 60 %. Ein paar Dutzend Waren verkaufen sich fast wie bisher, ein randvolles Lager mit teuren Waren
+// (Kran, „Überschuss verkaufen“) bringt aber nicht mehr Millionen auf einen Schlag.
+const SELL_D = 0.25, SELL_MIN = 0.6;
+function sellFactor(r, k) { const m0 = S.mkt.m[r] ?? 1, d = SELL_D / vol(r), lo = Math.min(m0, SELL_MIN); if (k <= 1) return 1; const nf = Math.min(k, Math.floor((m0 - lo) / d) + 1), sum = nf * m0 - d * nf * (nf - 1) / 2 + (k - nf) * lo; return clamp(sum / (k * m0), lo / m0, 1); }
+const sellValue = (r, k) => k > 0 ? Math.round(k * sv(r) * sellFactor(r, k)) : 0;
+function sellFromLager(r, n) { if (RES[r].nosell) return 0; const k = Math.min(Math.floor(n), lhas(r)); if (!(k > 0)) return 0; const v = sellValue(r, k); ltake(r, k); S.coins += v; statU(r, k); soldAcc += v; mktSold(r, k); return v; }
 
 // ---------- Statistik: letzte 60 Sekunden ----------
 const STB = Array.from({ length: 60 }, () => ({ p: {}, u: {}, c: 0 })); let stSec = -1;
@@ -3405,12 +3467,25 @@ function machTick(id, dt, vis) {
 const hcap = id => HBUF[hst(id).belt];
 function hbufN(id) { let s = 0; const b = hst(id).buf; for (const k in b) s += b[k]; return s; }
 const hrate = (id, r) => HARV[id].make[r] * HSPD[hst(id).spd - 1] * 60;
+// 4.5: Sägebots fällen die Bäume ihres Gebiets (die nächsten zuerst). Steht kein Baum, warten sie, bis einer nachgewachsen ist.
+function treeTake(reg, res, k, at, vis) {
+  let got = 0;
+  while (got < k) {
+    let best = null, bd = 1e18;
+    for (const n of nodes) { if (n.left <= 0 || n.region !== reg || !NODE[n.kind].tree || NODE[n.kind].res !== res) continue; const d = (n.x - at.x) * (n.x - at.x) + (n.y - at.y) * (n.y - at.y); if (d < bd) { bd = d; best = n; } }
+    if (!best) break;
+    const t = Math.min(k - got, best.left); best.left -= t; got += t; best.shake = 1;
+    if (best.left <= 0) { const d = NODE[best.kind]; best.plant = 0; best.regrowT = d.regrow / (1 + GIESS * S.sp.giess); if (vis && state === 'play' && inView(best.x, best.y, 40)) { sfx('treefall', { x: best.x, y: best.y, vol: 0.45 }); fxEvent('treefall', { x: best.x, y: best.y, kind: best.kind, ref: best, fromX: at.x, fromY: at.y }); } }
+  }
+  return got;
+}
 function harvTick(id, dt, vis) {
-  const h = hst(id), def = HARV[id], m = HSPD[h.spd - 1], capN = hcap(id);
+  const h = hst(id), def = HARV[id], m = HSPD[h.spd - 1], capN = hcap(id), saw = def.kind === 'saw';
   let n = hbufN(id);
   for (const r in def.make) {
     h.acc[r] = (h.acc[r] || 0) + def.make[r] * m * dt;
-    const k = Math.min(Math.floor(h.acc[r]), capN - n);
+    let k = Math.min(Math.floor(h.acc[r]), capN - n);
+    if (k > 0 && saw) { k = treeTake(def.reg, r, k, PL[id], vis); if (!k) { h.acc[r] = Math.min(h.acc[r], 1); h.noTree = T; } }
     if (k > 0) { h.buf[r] = (h.buf[r] || 0) + k; n += k; h.acc[r] -= k; h.popT = T; if (vis) statP(r, k); if (offMade) offMade[r] = (offMade[r] || 0) + k; }
     if (n >= capN) h.acc[r] = Math.min(h.acc[r], 1);
   }
@@ -3477,7 +3552,7 @@ function harvest(n, who) {
     if (def.fish || def.crop || n.kind === 'kaktus') burst(n.x, n.y - 14, n.kind === 'kaktus' ? '#6cc46a' : def.fish ? '#d8f4ff' : RES[def.res].col, def.fish ? 6 : 3, 90);
     if (def.fish && who !== pl) sfx('reel', { x: n.x, y: n.y });
   }
-  if (n.left <= 0) { n.regrowT = def.regrow * (def.tree ? 1 / (1 + 0.2 * S.sp.giess) : def.crop ? 1 / (1 + 0.25 * S.sp.duenger) / (S.trade.bp.gewaechs ? 1.5 : 1) : 1); if (inView(n.x, n.y, 40)) { if (!def.tree && (def.fish || def.crop || NOFX.has(n.kind))) burst(n.x, n.y - 12, RES[def.res].col, 9, 130); if (def.tree) sfx('treefall', { x: n.x, y: n.y, vol: who === pl ? 1 : 0.55 }); if (def.fish) sfx('splash', { x: n.x, y: n.y }); }
+  if (n.left <= 0) { n.plant = 0; n.regrowT = def.regrow * (def.tree ? 1 / (1 + GIESS * S.sp.giess) : def.crop ? 1 / (1 + 0.25 * S.sp.duenger) / (S.trade.bp.gewaechs ? 1.5 : 1) : 1); if (inView(n.x, n.y, 40)) { if (!def.tree && (def.fish || def.crop || NOFX.has(n.kind))) burst(n.x, n.y - 12, RES[def.res].col, 9, 130); if (def.tree) sfx('treefall', { x: n.x, y: n.y, vol: who === pl ? 1 : 0.55 }); if (def.fish) sfx('splash', { x: n.x, y: n.y }); }
     fxEvent('depleted', { x: n.x, y: n.y, kind: n.kind }); fxEvent(def.tree ? 'treefall' : def.fish ? 'splash' : def.crop ? 'harvested' : 'rockbreak', { x: n.x, y: n.y, kind: n.kind, face: who && who.face, ref: n, fromX, fromY, to: who === pl ? pl : null }); }
   return got;
 }
@@ -3594,6 +3669,7 @@ function goalInfo() {
 
 // ---------- 4.2: Meisterpunkte, Logbuch und Segeln ----------
 const logOn = () => !!(S.done.turm || META.ship || ISL || META.mpAll > 0);
+const spendeCost = () => 250000 * Math.pow(2, Math.min(40, META.don || 0));
 function mpScore() {
   let s = 0;
   for (const p of PLATES) if (!p.opt && S.done[p.id]) s += TIERS.includes(p.id) ? 3 : p.id === 'turm' ? 10 : 1;
@@ -3615,7 +3691,7 @@ const MAINN = PLATES.filter(p => !p.opt).length;
 function slotProg(o) { const d = obj(o && o.done); return { n: PLATES.filter(p => !p.opt && d[p.id]).length, tier: 1 + TIERS.filter(id => d[id]).length, fin: !!d.turm, started: !!(o && o.started) }; }
 let sailSure = null, sailSureT = -9, sailing = null, xlogOn = 0;
 const sureOn = n => sailSure === n && T - sailSureT < 4;
-const logKey = () => META.mp + '|' + JSON.stringify(META.boost) + META.islands.length + META.ship + (META.got[ISL ? ISL.n : 0] || 0) + '|' + (sailSure !== null && T - sailSureT < 4 ? sailSure : 'x');
+const logKey = () => META.mp + '|' + (META.don || 0) + '|' + (S.coins >= spendeCost()) + '|' + JSON.stringify(META.boost) + META.islands.length + META.ship + (META.got[ISL ? ISL.n : 0] || 0) + '|' + (sailSure !== null && T - sailSureT < 4 ? sailSure : 'x');
 function logHtml(withTabs) {
   let h = head('Logbuch', '⭐ ' + fmt(META.mp)) + (withTabs ? tabs() : '');
   const here = ISL ? ISL.n : 0;
@@ -3625,6 +3701,8 @@ function logHtml(withTabs) {
     const b = BOOST[k], l = BL(k), c = b.cost[l];
     h += `<div class="up"><div><strong>${b.name} ${l}/${b.max}</strong><small>${b.what} · ${l ? b.fx(l) : ''}${c !== undefined ? (l ? ' → ' : '') + b.fx(l + 1) : ''}</small></div>${c === undefined ? '<button class="buy" data-free="1" disabled>Max</button>' : `<button class="buy" data-act="boost" data-k="${k}" data-free="1"${META.mp < c ? ' disabled' : ''}>⭐ ${c}</button>`}</div>`;
   }
+  // 4.5: Spende an die Gilde: Münzen dieser Insel gegen Meisterpunkte (jede Spende kostet doppelt so viel wie die letzte)
+  { const c = spendeCost(); h += `<div class="up"><div><strong>Spende an die Gilde</strong><small>Münzen dieser Insel gegen 1 ⭐ · jede weitere kostet doppelt · bisher ${fmt(META.don || 0)}</small></div><button class="buy" data-act="spende" data-k="" data-cost="${c}">${coinH}${big(c)}</button></div>`; }
   h += '<div class="sec">Inseln</div>';
   const list = [{ n: 0, name: 'Schürfland', sub: 'Heimatinsel' }, ...META.islands.map(i => ({ n: i.n, name: i.name, sub: THEMES[i.theme].name }))];
   for (const it of list) {
@@ -3634,7 +3712,7 @@ function logHtml(withTabs) {
   }
   if (META.ship) { const nx = nextIsle(); h += `<div class="up"><div><strong>Neue Insel entdecken</strong><small>${nx.name} · frisch beginnen, Boni kommen mit</small></div><button class="buy${sureOn(-1) ? ' sure' : ''}" data-act="sail" data-k="-1" data-free="1">${sureOn(-1) ? 'Wirklich?' : '⛵ Los'}</button></div>`; }
   else h += '<small class="note">Nach dem Leuchtturm das Expeditionsschiff am Hafensteg bauen. Dann geht es zu neuen Inseln.</small>';
-  h += '<small class="note">Jede Insel hat ihren eigenen Spielstand. Während du weg bist, arbeiten Helfer und Maschinen dort weiter (bis 2 Std).</small>';
+  h += '<small class="note">Jede Insel hat ihren eigenen Spielstand. ' + (PAUSE() ? 'Sie wartet, bis du zurückkommst.' : 'Während du weg bist, arbeiten Helfer und Maschinen dort weiter (bis 2 Std).') + '</small>';
   return h;
 }
 function sailTo(n) {
@@ -3760,10 +3838,11 @@ function update(dt) {
   mpTick(dt);
   // 4.4: Jahreszeiten wirken sanft auf Nachwachsen (Bäume, Felder, Fischgründe)
   const wet = wxWet() ? 1.6 : 1, sm = seaMods(), gT = (wet > 1 ? wet : 1) * sm.growthMul, gC = (wet > 1 ? wet : 1) * sm.cropMul;
+  const grow = state === 'play';
   for (const n of nodes) {
     if (n.shake > 0) n.shake = Math.max(0, n.shake - dt * 5);
     if (n.pop > 0) n.pop = Math.max(0, n.pop - dt * 2.5);
-    if (n.left <= 0) { const d = NODE[n.kind]; n.regrowT -= dt * (d.tree ? gT : d.crop ? gC : d.fish ? sm.fishMul : 1); if (n.regrowT <= 0) { n.left = d.amount; n.pop = 1; fxEvent('regrow', { ref: n }); PFX.event('regrow', { ref: n }); } }
+    if (n.left <= 0 && grow) { const d = NODE[n.kind]; n.regrowT -= dt * (d.tree ? gT : d.crop ? gC : d.fish ? sm.fishMul : 1); if (n.regrowT <= 0) { n.left = d.amount; n.pop = 1; n.plant = 0; fxEvent('regrow', { ref: n }); PFX.event('regrow', { ref: n }); } }
   }
   for (const q of parts) { q.x += q.vx * dt; q.y += q.vy * dt; q.vh -= 520 * dt; q.h = Math.max(0, q.h + q.vh * dt); q.life -= dt; }
   parts = parts.filter(q => q.life > 0);
@@ -3988,6 +4067,7 @@ function complete(p) {
   if (fresh.length) setTimeout(() => { if (state === 'play' && !banner) banner = { a: 'Neu baubar', b: fresh.map(shortTitle).join(' · '), life: 2.6, age: 0 }; }, 3400);
   if (onComplete) onComplete(p.id);
   fillQuests(); computeNeeds(); save(true); updateHud(true);
+  if (!p.opt) rangSubmit('ziel');
 }
 
 // ---------- Helfer ----------
@@ -4011,7 +4091,7 @@ function route(a, b) {
 const hasTr = (c, t) => !!c.tr && c.tr.includes(t);
 const lvMul = c => 1 + 0.05 * (c.lv - 1);
 const foodMul = c => !foodOn() ? 1 : c.fed > 0 ? 1.25 : 0.85;
-const workMul = h => lvMul(h.cfg) * (hasTr(h.cfg, 'fleiss') ? 1.15 : 1) * foodMul(h.cfg) * (h.boss || 1);
+const workMul = h => lvMul(h.cfg) * (hasTr(h.cfg, 'fleiss') ? 1.15 : 1) * foodMul(h.cfg) * (h.boss || 1) * (1 + 0.02 * (S.schmuck || 0));
 const walkMul = h => (hasTr(h.cfg, 'flink') ? 1.2 : 1) * (1 + 0.03 * (h.cfg.lv - 1)) * (foodOn() && h.cfg.fed <= 0 ? 0.9 : 1) * (h.boss > 1 ? 1.1 : 1);
 const loadCap = (c, base) => base + (hasTr(c, 'stark') ? 3 : 0) + Math.floor((c.lv - 1) / 3) + TRANS[S.trans].cap;
 // 4.3: Wege und Pflaster machen Helfer schneller, Sand und Wäldchen langsamer (Karren noch mehr)
@@ -4049,7 +4129,7 @@ function newHelperCfg(type) {
   if (Math.random() < 0.45) { const t2 = keys[Math.floor(Math.random() * keys.length)]; if (t2 !== tr[0]) tr.push(t2); }
   const areas = workAreas(type);
   const work = type === 'berg' ? (areas[areas.length - 1] || 'wiese') : type === 'bauer' || type === 'fischer' ? 'acker' : type === 'vorarbeiter' ? busiestArea() : 'wiese';
-  return { type, work, res: 'auto', keep: 0, sell: 100, name, lv: 1, xp: 0, tr, id: ++S.hid, fed: 0, at: null, build: true, to: 'auto', wauto: type === 'holz' || type === 'berg' };
+  return { type, work, res: 'auto', keep: 0, sell: 100, name, lv: 1, xp: 0, tr, id: ++S.hid, fed: 0, at: null, build: true, to: 'auto', wauto: type === 'holz' || type === 'berg' || type === 'foerster' };
 }
 function busiestArea() { const n = {}; for (const c of S.helpers) if (HKIND(c.type) === 'g') n[c.work] = (n[c.work] || 0) + 1; let best = 'wiese', bv = 0; for (const k in n) if (n[k] > bv) { bv = n[k]; best = k; } return best; }
 function spawnHelper(cfg) {
@@ -4090,7 +4170,10 @@ function canDo(type, n) {
   if (def.crop || def.fish || def.deep || (type !== 'holz' && type !== 'berg')) return false;
   return (type === 'holz' ? def.tool === 'axe' : def.tool === 'pick') && toolOk(def);
 }
-function workAreas(type) { return MAINREG.filter(id => open(REG[id]) && nodes.some(n => n.region === id && canDo(type, n))); }
+function workAreas(type) { if (type === 'foerster') return MAINREG.filter(id => open(REG[id]) && nodes.some(n => n.region === id && woodTree(n))); return MAINREG.filter(id => open(REG[id]) && nodes.some(n => n.region === id && canDo(type, n))); }
+// 4.5: Holzbäume (keine Kakteen, keine Leuchtbäume): die pflanzt der Förster neu
+const woodTree = n => { const d = NODE[n.kind]; return !!d.tree && (d.res === 'holz' || d.res === 'hartholz' || d.res === 'mondholz'); };
+const PLANT_K = 0.5;   // Setzling: die restliche Wachszeit halbiert sich (doppelt so schnell)
 // Was kann ein Helfer in seinem Gebiet sammeln?
 function areaRes(type, reg) { const out = []; for (const n of nodes) if (n.region === reg && canDo(type, n) && !out.includes(NODE[n.kind].res)) out.push(NODE[n.kind].res); return out.sort((a, b) => RES[a].price - RES[b].price); }
 function wantRes(h) {
@@ -4157,7 +4240,7 @@ function chooseDest(h) {
   }
   return marketDest(h);
 }
-const tradeMul = h => h.type === 'haendler' ? 1.25 + 0.02 * (h.cfg.lv - 1) : 1;
+const tradeMul = h => h.type === 'haendler' ? HAENDLER + 0.02 * (h.cfg.lv - 1) : 1;
 function sellLoad(h, x, y) {
   let sum = 0; const k = tradeMul(h); for (const r of h.load) { sum += Math.round(sv(r) * k); mktSold(r, 1); }
   S.coins += sum; h.sold += h.load.length; h.load = []; statC(sum);
@@ -4218,6 +4301,7 @@ function deliver(h, dt) {
 // Gebiet folgt dem Ziel: wo fehlt am meisten von dem, was dieser Beruf sammeln kann?
 function autoArea(type, cur) {
   let best = cur, bv = 0;
+  if (type === 'foerster') { for (const a of workAreas(type)) { let v = 0; for (const n of nodes) if (n.region === a && n.left <= 0 && !n.plant && woodTree(n)) v += 1 + (goalShort(NODE[n.kind].res) > 0 ? 1 : 0); if (a === cur) v *= 1.25; if (v > bv) { bv = v; best = a; } } return best; }
   for (const a of workAreas(type)) { let v = 0; for (const r of areaRes(type, a)) v = Math.max(v, goalShort(r)); if (a === cur) v *= 1.25; if (v > bv) { bv = v; best = a; } }
   return best;
 }
@@ -4242,6 +4326,39 @@ function gatherer(h, dt) {
     let got = harvest(n, h); if (got && hasTr(cfg, 'gluck') && Math.random() < 0.15) { got++; statP(NODE[n.kind].res, 1); }
     for (let i = 0; i < got; i++) h.load.push(NODE[n.kind].res); h.harvested += got; gainXp(h, got);
   }
+}
+// 4.5: Förster: geht zu gefällten Bäumen in seinem Gebiet und setzt einen Setzling (die restliche Wachszeit halbiert sich)
+function pickStump(h) {
+  let best = null, bd = 1e9;
+  for (const n of nodes) {
+    if (n.region !== h.cfg.work || n.left > 0 || n.plant || !woodTree(n) || helpers.some(o => o !== h && o.target === n)) continue;
+    const d = Math.hypot(n.x - h.x, n.y - h.y) - n.regrowT * 6;
+    if (d < bd) { bd = d; best = n; }
+  }
+  return best;
+}
+function forester(h, dt) {
+  const cfg = h.cfg, areas = workAreas('foerster');
+  if (!areas.length) { hGo(h, 'dorf', HUT.x + (h.seed - 3) * 9, HUT.y + 8, dt); return; }
+  if (!areas.includes(cfg.work)) { cfg.work = areas[0]; h.target = null; }
+  if (cfg.wauto && (h.waT = (h.waT ?? Math.random() * 5) - dt) <= 0) { h.waT = 15; const w = autoArea('foerster', cfg.work); if (w && w !== cfg.work) { cfg.work = w; h.target = null; } }
+  let n = h.target;
+  if (!n || n.left > 0 || n.plant || n.region !== cfg.work) { n = h.target = (h.retarget -= dt) <= 0 ? pickStump(h) : null; if (!n) h.retarget = 1; h.hitT = 1.1 / workMul(h); }
+  if (!n) {
+    // Nichts zu pflanzen: am nächsten Waldstück warten
+    h.waitT += dt; const g = GROVES.find(q => q.region === cfg.work) || REG[cfg.work];
+    const gx = g.x !== undefined ? g.x : (g.x0 + g.x1) / 2, gy = g.y !== undefined ? g.y + (g.r || 0) * 0.9 : (g.y0 + g.y1) / 2;
+    if (hGo(h, cfg.work, gx + (h.seed - 3) * 12, gy, dt) === null) cfg.work = areas[0];
+    return;
+  }
+  h.waitT = 0;
+  const a = hGo(h, n.region, n.ax, n.ay, dt);
+  if (a === null) { h.target = null; cfg.work = areas[0]; return; }
+  if (!a) return;
+  h.face = Math.atan2(n.y - h.y, n.x - h.x);
+  if ((h.hitT -= dt) > 0) { if (h.swing <= 0 && Math.random() < dt * 2) h.swing = 1; return; }
+  n.plant = 1; n.regrowT *= PLANT_K; h.target = null; h.swing = 1; h.harvested++; gainXp(h, 1.5);
+  if (inView(n.x, n.y, 40) && !deep) { say(n.x, n.y - 38, '🌱', '#fff', 15, 1); burst(n.x, n.y - 6, '#6cc46a', 6, 70); sfx('pop', { x: n.x, y: n.y, vol: 0.5 }); }
 }
 // Träger und Händler: Baustellen beliefern (aus dem Lager oder direkt vom Maschinen-Ausgang), Zwischenwaren von Maschine zu Maschine tragen,
 // Maschinen aus dem Lager versorgen, Sammler-Puffer holen, Überschuss verkaufen. Was übrig bleibt, landet im Lager.
@@ -4419,7 +4536,7 @@ function updateHelper(h, dt) {
   const c = h.cfg;
   if (foodOn()) { c.fed = Math.max(0, c.fed - dt); if ((h.eatT -= dt) <= 0) { h.eatT = 2; if (c.fed <= 20 && eat(c) && inView(h.x, h.y, 40) && !deep) { say(h.x, h.y - 56, '😋', '#fff', 16, 1); sfx('eat', { x: h.x, y: h.y }); } } }
   const k = HKIND(h.type);
-  if (k === 'c') carrier(h, dt); else if (k === 'w') worker(h, dt); else if (k === 'f') foreman(h, dt); else gatherer(h, dt);
+  if (k === 'c') carrier(h, dt); else if (k === 'w') worker(h, dt); else if (k === 'f') foreman(h, dt); else if (h.type === 'foerster') forester(h, dt); else gatherer(h, dt);
   if (h.moving && state === 'play' && ((h.stT = (h.stT ?? Math.random() * 0.4) - dt) <= 0)) { h.stT = 0.42; if (inView(h.x, h.y, 30)) fxStep(h, stepGround(h.x, h.y), false); }
 }
 
@@ -4570,7 +4687,7 @@ function deepBlast() {
 function cpCheck(F) {
   const c = cpCost(F.f), pd = S.deep.cpPaid;
   if (Object.keys(c.cost).every(k => (pd[k] || 0) >= c.cost[k]) && S.deep.cpBlast >= c.blasts) {
-    S.deep.cp = Math.max(S.deep.cp, F.f); S.deep.cpPaid = {}; S.deep.cpBlast = 0; F.cleared = true;
+    S.deep.cp = Math.max(S.deep.cp, F.f); S.deep.cpPaid = {}; S.deep.cpBlast = 0; F.cleared = true; setTimeout(() => rangSubmit('tiefe'), 50);
     if (F.f === 10) S.deep.lift = Math.max(1, S.deep.lift);
     multC = null;
     banner = { a: 'Herausforderung geschafft!', b: cpRewardTxt(F.f), life: 3.6, age: 0 };
@@ -4855,6 +4972,16 @@ function updVillagers(dt) {
   }
 }
 
+// 4.5: Was gerade nachwächst (Bäume, Felsen, Felder, Fischgründe), wird mitgespeichert: nach dem Laden ist die Welt wie verlassen
+function nodeSave() { const o = []; nodes.forEach((n, i) => { if (n.left < NODE[n.kind].amount) o.push([i, n.kind, Math.max(0, n.left), Math.round(Math.max(0, n.regrowT) * 10) / 10, n.plant ? 1 : 0]); }); return o; }
+function nodeLoad(a) {
+  if (!Array.isArray(a)) return;
+  for (const e of a.slice(0, 3000)) {
+    if (!Array.isArray(e)) continue; const n = nodes[e[0]]; if (!n || n.kind !== e[1]) continue;
+    const d = NODE[n.kind]; n.left = int(e[2], 0, d.amount, d.amount);
+    if (n.left <= 0) { n.regrowT = clamp(Number(e[3]) || 0, 0, d.regrow * 2); n.plant = e[4] ? 1 : 0; if (!(n.regrowT > 0)) { n.left = d.amount; n.plant = 0; } }
+  }
+}
 // ---------- Offline-Verdienst ----------
 function offRes(c) { const ok = open(REG[c.work]) && areaRes(c.type, c.work).length; const list = areaRes(c.type, ok ? c.work : (workAreas(c.type)[0] || 'wiese')); if (!list.length) return null; return c.res !== 'auto' && list.includes(c.res) ? c.res : list[list.length - 1]; }
 function offlineCalc(sec) {
@@ -4871,22 +4998,26 @@ function offlineCalc(sec) {
   const acc = gath.map(() => 0);
   for (let t = 0; t < sec; t += 5) {
     const dt = Math.min(5, sec - t);
+    // 4.5: Bäume, Felder und Fischgründe wachsen auch offline nach (Holz kommt nur von Bäumen, die stehen)
+    for (const n of nodes) if (n.left <= 0 && (n.regrowT -= dt) <= 0) { n.left = NODE[n.kind].amount; n.plant = 0; }
     autoTick(dt, false);
     if (foodOn()) for (const c of S.helpers) { c.fed = Math.max(0, c.fed - dt); if (c.fed <= 20) eat(c); }
     gath.forEach((c, i) => {
       const r = offRes(c); if (!r) return;
       acc[i] += (c.type === 'fischer' ? 0.18 : 0.25) * dt * lvMul(c) * foodMul(c) * boss * (hasTr(c, 'nacht') ? 1.5 : 1) * (hasTr(c, 'fleiss') ? 1.15 : 1);
-      const n = Math.floor(acc[i]); if (!n) return; acc[i] -= n;
+      let n = Math.floor(acc[i]); if (!n) return;
+      if (r === 'holz' || r === 'hartholz') { const reg = open(REG[c.work]) && areaRes(c.type, c.work).includes(r) ? c.work : workAreas(c.type).find(a => areaRes(c.type, a).includes(r)) || 'wiese', R = REG[reg]; n = treeTake(reg, r, n, { x: (R.x0 + R.x1) / 2, y: (R.y0 + R.y1) / 2 }, false); if (!n) { acc[i] = Math.min(acc[i], 1); return; } }
+      acc[i] -= n;
       offMade[r] = (offMade[r] || 0) + n;
       const keepOk = !c.keep || lhas(r) < c.keep, k = S.done.lager && keepOk ? ladd(r, n) : 0;
-      if (n - k > 0) { S.coins += (n - k) * sv(r); sold += n - k; }
+      if (n - k > 0) { S.coins += (n - k) * sv(r); sold += n - k; mktSold(r, n - k); }   // 4.5: auch hier drückt Verkaufen den Preis
       c.xp += n * 0.5 * (hasTr(c, 'klug') ? 1.5 : 1); while (c.lv < HMAXLV && c.xp >= xpNeed(c.lv)) { c.xp -= xpNeed(c.lv); c.lv++; }
     });
     for (const c of tr) {
       let budget = 0.4 * dt * (hasTr(c, 'nacht') ? 1.5 : 1);
       if (c.type === 'traeger') for (const id of harvIds()) { if (hst(id).belt > 0 || budget < 1) continue; const k = Math.min(Math.floor(budget), hbufN(id), lfree()); if (k > 0) { moveBuf(hst(id), k, (r, n) => ladd(r, n)); budget -= k; } }
-      const pm = c.type === 'haendler' ? 1.25 + 0.02 * (c.lv - 1) : 1;
-      if (c.sell > 0) for (const r of Object.keys(S.lager.it)) { const k = Math.min(Math.floor(budget), surplus(r) - c.sell); if (k > 0) { const v = Math.round(ltake(r, k) * sv(r) * pm); S.coins += v; sold += k; budget -= k; } }
+      const pm = c.type === 'haendler' ? HAENDLER + 0.02 * (c.lv - 1) : 1;
+      if (c.sell > 0) for (const r of Object.keys(S.lager.it)) { const k = Math.min(Math.floor(budget), surplus(r) - c.sell); if (k > 0) { const v = Math.round(ltake(r, k) * sv(r) * pm); mktSold(r, k); S.coins += v; sold += k; budget -= k; } }   // 4.5: offline drückt Verkaufen die Preise wie im Spiel
     }
     for (const c of S.helpers) if (c.type === 'schmied' && c.at) S.smith += dt * 1.2 * lvMul(c) * (hasTr(c, 'nacht') ? 1.5 : 1);
     smithTick();
@@ -7568,7 +7699,7 @@ function terrainDecor(g, bx0, by0, bx1, by1) {
   // Deko
   for (const d of DECOR) {
     const m = d.x2 !== undefined || d.t === 'pierd' ? 330 : 70;
-    if (d.t === 'patch' || d.x < bx0 - m || d.x > bx1 + m || d.y < by0 - m || d.y > by1 + m || (d.tier && tn < d.tier)) continue;
+    if (d.t === 'patch' || d.x < bx0 - m || d.x > bx1 + m || d.y < by0 - m || d.y > by1 + m || (d.tier && tn < d.tier) || (d.sch && (S.schmuck || 0) < d.sch)) continue;
     if (snowy && (d.t === 'flowers' || d.t === 'tuft' || d.t === 'shroom')) continue;
     drawDecor(g, d);
   }
@@ -7953,7 +8084,7 @@ function drawNode(n) {
   if (def.deep && growing) { blit(nodeSprite(n, true), x, y, n.kind === 'kiste' ? 1 : 0.4); return; }
   if (litOn) nodeLight(n);
   if (def.tree) {
-    if (growing) { blit(stumpSprite(n.kind === 'mondbaum'), x, y); PFX.drawNodeFx(n, x, y); if (g > 0.2) blit(treeOf(n), x, y - 2, g * 0.5 * n.sc); return; }
+    if (growing) { blit(stumpSprite(n.kind === 'mondbaum'), x, y); PFX.drawNodeFx(n, x, y); if (g > 0.2) blit(treeOf(n), x, y - 2, g * 0.5 * n.sc); else if (n.plant) sprout(x + 6, y - 2); return; }
     const spr = treeOf(n), sx = n.sc * pop * (1 + n.shake * .05), sy = n.sc * pop * (1 - n.shake * .04);
     if (!FANCY()) blit(spr, x, y, sx, sy);
     else { const sk = PFX.treeSkew(n, n.x, n.y, n.seed); ctx.save(); ctx.translate(n.x, y); ctx.transform(1, 0, sk, 1, 0, 0); blit(spr, 0, 0, sx, sy); ctx.restore(); }
@@ -7975,6 +8106,11 @@ function drawNode(n) {
     }
   }
   if (!growing && !toolOk(def)) tierBadge(x, y - 46, def);
+}
+// 4.5: kleiner Setzling, den der Förster gepflanzt hat
+function sprout(x, y) {
+  ctx.strokeStyle = '#4a7a2a'; ctx.lineWidth = 1.6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 9); ctx.stroke();
+  ctx.fillStyle = '#6cc46a'; E(ctx, x - 3.6, y - 9, 3.8, 2.2); ctx.fill(); E(ctx, x + 3.6, y - 10.5, 3.8, 2.2); ctx.fill(); ctx.fillStyle = '#9be27a'; E(ctx, x + 3, y - 11, 1.6, 0.9); ctx.fill();
 }
 function tierBadge(x, y, def) {
   ctx.fillStyle = 'rgba(35,48,31,.82)'; RR(ctx, x - 16, y - 8.5, 32, 17, 7); ctx.fill();
@@ -8053,6 +8189,8 @@ function drawTool(p, tool, swing) {
     ctx.strokeStyle = '#ffffff'; ctx.lineWidth = .9; ctx.beginPath(); ctx.arc(ex + px2 * 5, ey + py2 * 5, 8, a - .6, a + 1.4); ctx.stroke();
   } else if (tool === 'hammer') {
     ctx.save(); ctx.translate(ex, ey); ctx.rotate(a); ctx.fillStyle = '#5a6070'; RR(ctx, -4, -6, 8, 12, 2); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.fillRect(-3, -5, 2, 10); ctx.restore();
+  } else if (tool === 'spade') {
+    ctx.save(); ctx.translate(ex, ey); ctx.rotate(a); ctx.fillStyle = '#9aa2ad'; RR(ctx, -1, -4.5, 9, 9, 2.5); ctx.fill(); ctx.fillStyle = 'rgba(255,255,255,.45)'; ctx.fillRect(1, -3.5, 2, 7); ctx.restore();
   } else if (tool === 'axe') {
     ctx.fillStyle = '#9aa2ad'; ctx.beginPath(); ctx.moveTo(ex - Math.cos(a) * 5, ey - Math.sin(a) * 5); ctx.lineTo(ex + px2 * 8 - Math.cos(a) * 6, ey + py2 * 8 - Math.sin(a) * 6); ctx.lineTo(ex + px2 * 8 + Math.cos(a) * 3, ey + py2 * 8 + Math.sin(a) * 3); ctx.lineTo(ex + Math.cos(a) * 2, ey + Math.sin(a) * 2); ctx.closePath(); ctx.fill();
     ctx.strokeStyle = '#eef2f6'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(ex + px2 * 8 - Math.cos(a) * 6, ey + py2 * 8 - Math.sin(a) * 6); ctx.lineTo(ex + px2 * 8 + Math.cos(a) * 3, ey + py2 * 8 + Math.sin(a) * 3); ctx.stroke();
@@ -8165,7 +8303,7 @@ function drawStruct(p) {
   if (p.id === 'turm' && !TH) { beamAt = BEAM; BEAM.x = x; BEAM.y = y; }
   if (p.id === 'schacht') { drawWheel(x - 6, y - 140, 15, T - liftFlowT < 1.5 || (deep && T % 1 < 2) ? T * 3 : 0); label(x, y - 178, 'Tiefenmine', 14, '#fff'); if (S.deep.max) label(x, y - 162, 'tiefste Etage ' + S.deep.max, 12, '#bfefff'); return; }
   if (p.id === 'fischer') { label(x, y - 112, 'Fischerhütte', 14, '#fff'); return; }
-  if (TIERS.includes(p.id)) { const t = TIERS.indexOf(p.id) + 2, C = RATH[t]; if (t >= 4) for (const sg of [-1, 1]) PFX.drawFlag(ctx, x + sg * (C.w / 2 + 6), y - C.h - 29, 17, 10, sg < 0 ? '#e0b83a' : '#3c74c4', sg + 3); label(x, y - C.h - 70 - C.tower * 18, 'Rathaus · ' + TIERNAME[t - 1], 14, '#ffe08a'); return; }
+  if (TIERS.includes(p.id)) { const t = TIERS.indexOf(p.id) + 2, C = RATH[t]; if (t >= 4) for (const sg of [-1, 1]) PFX.drawFlag(ctx, x + sg * (C.w / 2 + 6), y - C.h - 29, 17, 10, sg < 0 ? '#e0b83a' : '#3c74c4', sg + 3); label(x, y - C.h - 70 - C.tower * 18, 'Rathaus · ' + TIERNAME[t - 1] + (dorfName() ? ' ' + dorfName() : ''), 14, '#ffe08a'); return; }
   if (p.id === 'kran') { drawKranJib(x, y); label(x, y - 220, 'Kran', 14, '#fff'); return; }
   if (p.id === 'lager') {
     const n = lagerTotal(), c = lcap(), bw = 70, f = clamp(n / c, 0, 1);
@@ -8179,6 +8317,18 @@ function drawStruct(p) {
     return;
   }
   if (p.id === 'krone' && !LOW()) { const s = Math.sin(T * 3); sparkle(x, y - 72, 4 + s * 2, .7 + s * .3); }
+}
+// 4.5: Ortsschild am Dorfeingang (rechts vom Weg vor der Brücke ins Dorf) mit dem Dorfnamen
+const SIGN = { x: MXv(566), y: 2178 };
+function drawSign() {
+  const x = SIGN.x, y = SIGN.y, nm = dorfName() || 'Schürfland', sub = ISL ? THEMES[ISL.theme].name : TIERNAME[tierNow() - 1], top = y - 54, h = 34;
+  ctx.font = '15px ' + FONT; const w = Math.max(76, ctx.measureText(nm).width + 22);
+  ctx.fillStyle = '#6e4219'; RR(ctx, x - w / 2 + 9, top + 12, 5, y - top - 12, 2); ctx.fill(); RR(ctx, x + w / 2 - 14, top + 12, 5, y - top - 12, 2); ctx.fill();
+  ctx.fillStyle = lgrad(ctx, 0, top, 0, top + h, ['#e6b878', '#b07b45']); RR(ctx, x - w / 2, top, w, h, 6); ctx.fill();
+  ctx.strokeStyle = '#7a4d26'; ctx.lineWidth = 2; RR(ctx, x - w / 2, top, w, h, 6); ctx.stroke();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#6a3f1c'; ctx.font = '10px ' + FONT; ctx.fillText(sub, x, top + 10);
+  ctx.fillStyle = '#3a2210'; ctx.font = '15px ' + FONT; ctx.fillText(nm, x, top + 23);
 }
 function drawStation(st, kind) {
   const k = born['st' + st.i] ? easeBack((T - born['st' + st.i]) / 0.6) : 1;
@@ -8304,6 +8454,7 @@ function draw() {
   if (S.done.hafen) list.push([DOCK.y, 11, DOCK]);
   if ((S.done.expedition || ISL) && inView(XSHIP.x, XSHIP.y - 90, 200)) list.push([XSHIP.y, 12, XSHIP]);
   for (const f of CAMPS) if (inView(f.x, f.y, 60)) list.push([f.y, 14, f]);
+  if (inView(SIGN.x, SIGN.y - 30, 140)) list.push([SIGN.y, 15, SIGN]);
   PFX.drawSorted(list);
   list.sort((a, b) => a[0] - b[0]);
   if (FANCY()) drawShadows(list);
@@ -8322,6 +8473,7 @@ function draw() {
     else if (k === 12) drawXShip();
     else if (k === 13) drawLagerStock();
     else if (k === 14) drawFire(o);
+    else if (k === 15) drawSign();
     else if (k === 20) PFX.drawEntry(o);
     else drawShip();
   }
@@ -8565,7 +8717,7 @@ function issues() {
     if (!st.cur && st.rec !== 'pause') { if (st.waitT > 2 && def.rec.some(r => (needs[r.out] || 0) > lhas(r.out))) out.push({ t: def.name + ': ' + machWait(id), bad: true }); }
     else if (st.cur) { const rec = def.rec[st.cur.i]; if (Object.keys(rec.in).every(r => lhas(r) > 40) && (needs[rec.out] || 0) > lhas(rec.out)) out.push({ t: def.name + ' kommt nicht nach: Tempo oder Menge ausbauen', bad: false }); }
   }
-  for (const id of harvIds()) { const h = hst(id); if (h.full) out.push({ t: HARV[id].name + ' (' + REGNAME[HARV[id].reg] + '): ' + (h.belt ? 'Band zu langsam' : 'Puffer voll, Förderband oder Träger fehlt'), bad: !h.belt }); }
+  for (const id of harvIds()) { const h = hst(id); if (HARV[id].kind === 'saw' && T - (h.noTree ?? -99) < 3 && !h.full) out.push({ t: HARV[id].name + ' (' + REGNAME[HARV[id].reg] + '): wartet auf nachwachsende Bäume · Gießkanne oder Förster helfen', bad: false }); if (h.full) out.push({ t: HARV[id].name + ' (' + REGNAME[HARV[id].reg] + '): ' + (h.belt ? 'Band zu langsam' : 'Puffer voll, Förderband oder Träger fehlt'), bad: !h.belt }); }
   for (const k in needs) { const o = RAWOF[k]; if (o && !S.done[o.b] && (needs[k] || 0) > lhas(k)) out.push({ t: RES[k].name + ': erst ' + BLD[o.b].name + ' bauen', bad: true }); }
   for (const k in needs) { const o = RAWOF[k]; if (!o || !S.done[o.b] || (needs[k] || 0) <= lhas(k)) continue; const st = bst(o.b); if (st.rec !== 'auto' && (st.rec === 'pause' || BLD[o.b].rec[st.rec].out !== k)) out.push({ t: BLD[o.b].name + ' ist auf ' + (st.rec === 'pause' ? 'Pause' : RES[BLD[o.b].rec[st.rec].out].name) + ' gestellt, gebraucht wird ' + RES[k].name + ' (Rezept auf Auto)', bad: true }); }
   if (foodOn() && S.helpers.length && FOODS.every(f => !lhas(f)) && S.helpers.some(c => c.fed <= 0)) out.push({ t: 'Kein Essen im Lager: Helfer sind hungrig und etwas langsamer', bad: true });
@@ -8642,17 +8794,17 @@ function boardHtml() {
   });
   return h;
 }
-const tabs = () => { const l = [['lager', '📦 Lager'], ['prod', '⚙ <span class="tl">Produktion</span><span class="ts">Prod.</span>'], ['helfer', '👷 Helfer'], ['dorf', '🏘 Dorf'], ...(S.done.erfinder ? [['tech', '🔬 Technik']] : []), ['markt', '⚖ Markt'], ...(logOn() ? [['log', '🧭 Logbuch']] : [])]; return '<div class="tabs' + (l.length > 6 ? ' n7' : '') + '">' + l.map(([k, n]) => `<button class="tab${hubTab === k ? ' on' : ''}" data-act="tab" data-k="${k}">${n}</button>`).join('') + '</div>' };
+const tabs = () => { const l = [['lager', '📦 Lager'], ['prod', '⚙ <span class="tl">Produktion</span><span class="ts">Prod.</span>'], ['helfer', '👷 Helfer'], ['dorf', '🏘 Dorf'], ...(S.done.erfinder ? [['tech', '🔬 Technik']] : []), ['markt', '⚖ Markt'], ...(logOn() ? [['log', '🧭 Logbuch']] : []), ['rang', '🏆 Rang']]; return '<div class="tabs' + (l.length > 6 ? ' n7' : '') + '">' + l.map(([k, n]) => `<button class="tab${hubTab === k ? ' on' : ''}" data-act="tab" data-k="${k}">${n}</button>`).join('') + '</div>' };
 function lagerHtml() {
   const lt = lagerTotal(), c = LCOST[S.lager.lv - 1];
   let h = head('Lager', fmt(lt) + '/' + fmt(lcap())) + tabs();
   h += row('Lager ausbauen', 'Stufe ' + S.lager.lv + ' · Platz für ' + fmt(lcap()) + (c !== undefined ? ' → ' + fmt(LCAP[S.lager.lv]) : ''), c === undefined ? null : c, 'lup', '');
   const items = Object.keys(S.lager.it).sort((a, b) => (keepN[b] || 0) - (keepN[a] || 0) || RES[b].price * S.lager.it[b] - RES[a].price * S.lager.it[a]);
   if (!items.length) return h + '<small class="note">Leer. Stell dich im Dorf auf die Rampe am Lager: dein Rucksack wandert hinein.</small>';
-  let all = 0; for (const r of items) all += surplus(r) * sv(r);
+  let all = 0; for (const r of items) all += sellValue(r, surplus(r));
   h += `<div class="up"><div><strong>Überschuss verkaufen</strong><small>Behält, was Ziel und Aufträge brauchen</small></div><button class="buy" data-act="sellall" data-free="1"${all ? '' : ' disabled'}>+${coinH}${fmt(all)}</button></div>`;
   h += '<div class="grid">';
-  for (const r of items) { const n = S.lager.it[r], sp = surplus(r), kp = keepN[r] || 0; h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(n)}${kp ? ' · fürs Ziel ' + fmt(Math.min(kp, n)) : ''}</span>${sp ? `<button class="buy" data-act="sell" data-k="${r}" data-free="1" aria-label="${RES[r].name} verkaufen">+${fmt(sp * sv(r))}</button>` : ''}</div>`; }
+  for (const r of items) { const n = S.lager.it[r], sp = surplus(r), kp = keepN[r] || 0; h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(n)}${kp ? ' · fürs Ziel ' + fmt(Math.min(kp, n)) : ''}</span>${sp ? `<button class="buy" data-act="sell" data-k="${r}" data-free="1" aria-label="${RES[r].name} verkaufen">+${fmt(sellValue(r, sp))}</button>` : ''}</div>`; }
   h += '</div>';
   if (S.done.kran) h += `<div class="opt"><span>Kran verkauft bei vollem Lager</span><button class="tog${S.kran.sell ? '' : ' off'}" data-act="ksell">${S.kran.sell ? 'An' : 'Aus'}</button></div>`;
   return h;
@@ -8710,7 +8862,7 @@ function portrait(type) {
   if (type === 'baecker') { E(g, 23, 10, 10, 7); g.fill(); RR(g, 14, 10, 18, 7, 2); g.fill(); }
   else { g.beginPath(); g.arc(23, 17, 11.5, Math.PI, 0); g.closePath(); g.fill(); E(g, 23, 17, 14, 3.4); g.fill(); }
   if (pal.lamp) { g.fillStyle = '#fffbe0'; E(g, 23, 11, 2.6, 2.4); g.fill(); }
-  const ic = { holz: '🪓', berg: '⛏', traeger: '📦', bauer: '🌾', fischer: '🎣', baecker: '🥖', schmied: '⚒', haendler: '💰', vorarbeiter: '📣', arbeiter: '⚙' }[type];
+  const ic = { foerster: '🌱', holz: '🪓', berg: '⛏', traeger: '📦', bauer: '🌾', fischer: '🎣', baecker: '🥖', schmied: '⚒', haendler: '💰', vorarbeiter: '📣', arbeiter: '⚙' }[type];
   g.font = '11px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(ic || '', 38, 38);
   try { PORT[type] = c.toDataURL(); } catch (e) { PORT[type] = ''; }
   return PORT[type];
@@ -8735,11 +8887,12 @@ function helferHtml() {
   S.helpers.forEach((c, i) => {
     const rt = helpers.find(x => x.cfg === c), d = HELP[c.type], kd = HKIND(c.type), pct = c.lv >= HMAXLV ? 100 : Math.round(c.xp / xpNeed(c.lv) * 100);
     const doing = rt && rt.dest ? (rt.dest.mach ? ' · bringt zum ' + BLD[rt.dest.mach].name : rt.dest.lager ? ' · bringt ins Lager' : rt.dest.plate ? ' · zum Bauplatz' : rt.dest.m ? ' · zum Markt' : '') : '';
-    const stat = rt ? (kd === 'g' ? fmt(rt.harvested) + ' gesammelt seit Start' + doing : kd === 'c' ? fmt(rt.stored + rt.sold) + ' bewegt seit Start' + doing : kd === 'f' ? REGNAME[c.work] : rt.atWork ? 'bei der Arbeit' : 'unterwegs') : '';
+    const stat = rt ? (c.type === 'foerster' ? fmt(rt.harvested) + ' Setzlinge gepflanzt seit Start' : kd === 'g' ? fmt(rt.harvested) + ' gesammelt seit Start' + doing : kd === 'c' ? fmt(rt.stored + rt.sold) + ' bewegt seit Start' + doing : kd === 'f' ? REGNAME[c.work] : rt.atWork ? 'bei der Arbeit' : 'unterwegs') : '';
     h += `<div class="hrow"><img src="${portrait(c.type)}" alt=""><div><strong>${esc(c.name)} · ${d.name}</strong><small>Stufe ${c.lv}${c.lv < HMAXLV ? '<span class="lvb"><i style="width:' + pct + '%"></i></span>' : ' (max) · '}${stat}</small></div><div>${(c.tr || []).filter(t => TRAITS[t]).map(t => `<span class="trait">${TRAITS[t].name}</span>`).join('')}${foodOn() ? (c.fed > 0 ? '<span class="trait food">satt</span>' : '<span class="trait hungry">hungrig</span>') : ''}</div></div>`;
     let pills = '';
     const pk = k => pickOpen && pickOpen.i === i && pickOpen.k === k ? ' on' : '';
-    if (kd === 'g') pills += `<button class="pill${pk('work')}" data-act="pick" data-i="${i}" data-k="work" data-free="1">${c.wauto ? 'Gebiet: Auto · ' + REGNAME[c.work] : REGNAME[c.work]} ▾</button><button class="pill" data-act="hres" data-i="${i}">${c.res === 'auto' ? 'Sammelt: Auto' : RES[c.res].name} ▸</button><button class="pill" data-act="hkeep" data-i="${i}">Bis ${c.keep ? fmt(c.keep) : '∞'} ▸</button><button class="pill${pk('to')}" data-act="pick" data-i="${i}" data-k="to" data-free="1">Liefern: ${toName(c.to)} ▾</button>`;
+    if (c.type === 'foerster') pills += `<button class="pill${pk('work')}" data-act="pick" data-i="${i}" data-k="work" data-free="1">${c.wauto ? 'Gebiet: Auto · ' + REGNAME[c.work] : REGNAME[c.work]} ▾</button>`;
+    else if (kd === 'g') pills += `<button class="pill${pk('work')}" data-act="pick" data-i="${i}" data-k="work" data-free="1">${c.wauto ? 'Gebiet: Auto · ' + REGNAME[c.work] : REGNAME[c.work]} ▾</button><button class="pill" data-act="hres" data-i="${i}">${c.res === 'auto' ? 'Sammelt: Auto' : RES[c.res].name} ▸</button><button class="pill" data-act="hkeep" data-i="${i}">Bis ${c.keep ? fmt(c.keep) : '∞'} ▸</button><button class="pill${pk('to')}" data-act="pick" data-i="${i}" data-k="to" data-free="1">Liefern: ${toName(c.to)} ▾</button>`;
     else if (kd === 'c') pills += `<button class="pill" data-act="tsell" data-i="${i}">Verkauft über ${c.sell ? fmt(c.sell) : '–'} ▸</button>` + (c.type === 'traeger' ? `<button class="pill" data-act="tbuild" data-i="${i}">${c.build === false ? 'Nur verkaufen' : 'Baustellen beliefern'} ▸</button><button class="pill${pk('to')}" data-act="pick" data-i="${i}" data-k="to" data-free="1">Liefern: ${toName(c.to)} ▾</button>` : '');
     else if (kd === 'w') pills += `<button class="pill" data-act="hat" data-i="${i}">${c.at && BLD[c.at] ? BLD[c.at].name : 'Keine Maschine'} ▸</button>`;
     else pills += `<button class="pill" data-act="varea" data-i="${i}">${REGNAME[c.work]} ▸</button>`;
@@ -8771,7 +8924,10 @@ function dorfHtml() {
     if (nxt.deep) h += `<span>⛏ Tiefenmine meistern</span><span class="${S.deep.cp >= nxt.deep ? 'ok' : ''}">${S.deep.cp >= nxt.deep ? '✓ ' : ''}Etage ${S.deep.cp}/${nxt.deep}</span>`;
     h += `</div><small class="note">Bringt: ${nxt.done}. Waren am Rathaus im Süden des Dorfs abgeben.</small>`;
   } else h += '<div class="okl">✓ Hafenstadt erreicht!</div>';
-  h += `<div class="sec">Einwohner ${popNow()}</div><small class="note">${S.helpers.length} Helfer · ${popNow() - S.helpers.length} Bewohner in Hütte und ${housesN()} Wohnhäusern${S.ops.length ? ' · dazu ' + S.ops.length + ' Arbeiter an den Maschinen' : ''}</small>`;
+  { const lv = S.schmuck || 0, nx = SCHMUCK[lv], lock = nx && tn < nx.tier ? 'Erst ' + TIERNAME[nx.tier - 1] + ' werden' : '';
+    h += `<div class="sec">Dorf verschönern ${lv}/${SCHMUCK.length}</div>`;
+    h += row(nx ? nx.name : 'Prunkgärten (max)', lock || (nx ? 'Neuer Schmuck im Dorf · +1 Einwohner · Helfer +2 % schneller' : 'Alles geschmückt · +' + lv + ' Einwohner · Helfer +' + 2 * lv + ' % schneller'), nx ? nx.cost : null, 'schmuck', '', !!lock); }
+  h += `<div class="sec">Einwohner ${popNow()}</div><small class="note">${S.helpers.length} Helfer · ${popNow() - S.helpers.length} Bewohner in Hütte und ${housesN()} Wohnhäusern${S.schmuck ? ' · ' + S.schmuck + ' fürs schöne Dorf' : ''}${S.ops.length ? ' · dazu ' + S.ops.length + ' Arbeiter an den Maschinen' : ''}</small>`;
   h += '<div class="sec">Essen</div>';
   if (!foodOn()) h += '<small class="note">Mit Bäckerei oder Fischerhütte werden Helfer satt und arbeiten 25 % schneller. Hungrige werden nur etwas langsamer.</small>';
   else {
@@ -8923,6 +9079,7 @@ function harvHtml(id) {
   const hv = hst(id), d = HARV[id];
   let h = head(d.name + ' · ' + REGNAME[d.reg]);
   h += `<small class="note">Macht ${Object.keys(d.make).map(r => fmt(hrate(id, r)) + ' ' + RES[r].name).join(' und ')} pro Minute · Puffer ${hbufN(id)}/${hcap(id)}</small>`;
+  if (d.kind === 'saw') h += `<small class="note">${T - (hv.noTree ?? -99) < 3 ? '⏳ Wartet gerade auf nachwachsende Bäume. ' : ''}Fällt die Bäume im Gebiet, die nächsten zuerst. Gießkanne und Förster lassen sie schneller nachwachsen.</small>`;
   h += hv.belt ? '<small class="note">Das Band bringt alles ins Lager. Stell dich drauf, dann legst du deinen Rucksack aufs Band.</small>' : '<small class="note">Ohne Band holen Träger den Puffer ab. Mit Band geht es von allein ins Lager.</small>';
   h += row('Tempo ' + hv.spd + '/' + HSPD.length, '×' + String(HSPD[hv.spd - 1]).replace('.', ','), hCost(id, 'spd'), 'hspd', id);
   h += row(hv.belt ? 'Förderband ' + hv.belt + '/' + (BELTR.length - 1) : 'Förderband zum Dorf', hv.belt ? fmt(BELTR[hv.belt] * 60) + ' pro Minute · Puffer ' + HBUF[hv.belt] : 'Bringt ' + fmt(BELTR[1] * 60) + ' pro Minute ins Lager', hCost(id, 'belt'), 'hbelt', id);
@@ -8952,7 +9109,7 @@ function proxMode() {
 }
 function sheetHtml(mode) {
   if (mode === 'board') return boardHtml();
-  if (mode === 'hub') return hubTab === 'prod' ? prodHtml() : hubTab === 'helfer' ? helferHtml() : hubTab === 'dorf' ? dorfHtml() : hubTab === 'tech' ? techHtml() : hubTab === 'markt' ? marktHtml() : hubTab === 'log' ? logHtml(true) : lagerHtml();
+  if (mode === 'hub') return hubTab === 'prod' ? prodHtml() : hubTab === 'helfer' ? helferHtml() : hubTab === 'dorf' ? dorfHtml() : hubTab === 'tech' ? techHtml() : hubTab === 'markt' ? marktHtml() : hubTab === 'log' ? logHtml(true) : hubTab === 'rang' ? rangSheetHtml() : lagerHtml();
   if (mode === 'hafen') return hafenHtml();
   if (mode === 'xlog') return logHtml(false);
   if (mode === 'strom') return stromHtml();
@@ -8965,7 +9122,7 @@ function sheetKeyOf(mode) {
   const live = Math.floor(T / 2);
   if (mode === 'board') return JSON.stringify(S.quests) + S.stats.quests;
   if (mode === 'xlog') return logKey();
-  if (mode === 'hub') return hubTab + (hubTab === 'log' ? logKey() : hubTab === 'prod' ? live : hubTab === 'helfer' ? JSON.stringify(S.helpers.map(h => [h.type, h.work, h.res, h.keep, h.sell, h.at, h.lv, h.fed > 0, h.build, h.to, h.wauto])) + helperCap() + jobPick + JSON.stringify(pickOpen) + Math.floor(S.smith / 50) + S.trans + S.ops.length + live : hubTab === 'tech' ? JSON.stringify(S.tech) + lhas('fp') + S.done.erfinder : hubTab === 'markt' ? live + JSON.stringify(S.trade.ship) + S.mkt.min + JSON.stringify(S.trade.bp) : hubTab === 'dorf' ? tierNow() + '|' + popNow() + JSON.stringify(S.paid) + FOODS.map(lhas).join() + S.deep.cp + live : JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + (S.coins >= (LCOST[S.lager.lv - 1] || 1e12)));
+  if (mode === 'hub') return hubTab + (hubTab === 'rang' ? rangKey() : hubTab === 'log' ? logKey() : hubTab === 'prod' ? live : hubTab === 'helfer' ? JSON.stringify(S.helpers.map(h => [h.type, h.work, h.res, h.keep, h.sell, h.at, h.lv, h.fed > 0, h.build, h.to, h.wauto])) + helperCap() + jobPick + JSON.stringify(pickOpen) + Math.floor(S.smith / 50) + S.trans + S.ops.length + live : hubTab === 'tech' ? JSON.stringify(S.tech) + lhas('fp') + S.done.erfinder : hubTab === 'markt' ? live + JSON.stringify(S.trade.ship) + S.mkt.min + JSON.stringify(S.trade.bp) : hubTab === 'dorf' ? tierNow() + '|' + popNow() + '|' + (S.schmuck || 0) + '|' + JSON.stringify(S.paid) + FOODS.map(lhas).join() + S.deep.cp + live : JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + (S.coins >= (LCOST[S.lager.lv - 1] || 1e12)));
   if (mode === 'hafen') return JSON.stringify(S.trade.ship) + Math.floor(S.trade.left) + live;
   if (mode === 'strom') return pwDem + '|' + Math.round(pwProd) + live;
   if (mode === 'drohnen') return S.dro.n + '|' + (S.coins >= 1500 * (S.dro.n + 1)) + live;
@@ -8973,7 +9130,7 @@ function sheetKeyOf(mode) {
   const [a, b] = mode.split(':');
   if (a === 'bank') return JSON.stringify(S.up) + JSON.stringify(S.sp) + S.helpers.length + helperCap() + Object.keys(S.done).length;
   if (a === 'mach') { const st = bst(b), o = opAt(b); return [st.rec, st.spd, st.bat, !!st.cur, st.cur && st.cur.i, st.state, live, JSON.stringify(st.inb), JSON.stringify(st.outb), o && o.atWork, Object.keys(mr(b).sup).length].join('|'); }
-  const h = hst(b); return [h.spd, h.belt, hbufN(b), h.full].join('|');
+  const h = hst(b); return [h.spd, h.belt, hbufN(b), h.full, T - (h.noTree ?? -99) < 3].join('|');
 }
 function updateSheet() {
   if (sheetMan && (state !== 'play' || Math.hypot(pl.x - sheetMan.x, pl.y - sheetMan.y) > 90)) sheetMan = null;
@@ -8994,7 +9151,7 @@ function openHub(tab) { if (tab) hubTab = tab; sheetMan = { mode: 'hub', x: pl.x
 const nextOf = (list, v) => list[(list.indexOf(v) + 1) % list.length];
 function fx(txt) { sfx('buy'); burst(pl.x, pl.y - 20, '#ffd34d', 16, 150); vib(20); if (txt) say(pl.x, pl.y - 70, txt, '#8ef0a8', 18, 1.4); pl.pop = 1; }
 // Alle Knöpfe laufen hier durch (auch für Tests und den Balance-Bot)
-const TABS = ['lager', 'prod', 'helfer', 'dorf', 'tech', 'markt', 'log'];
+const TABS = ['lager', 'prod', 'helfer', 'dorf', 'tech', 'markt', 'log', 'rang'];
 function doAct(act, k, i, v) {
   // 4.3: Eingaben prüfen, bevor etwas passiert (falsche Werte ändern nie den Spielstand)
   if (typeof act !== 'string' || (i !== undefined && i !== null && !(Number.isInteger(i) && i >= 0 && i < 1000))) return false;
@@ -9069,7 +9226,9 @@ function doAct(act, k, i, v) {
     const q = S.quests[i]; if (!q || q.got) return false;
     const c = Math.max(5, Math.round(q.reward * 0.1)); if (S.coins < c) return false;
     S.coins -= c; S.quests[i] = newQuest(S.quests.map(x => x.res));
-  } else if (act === 'tab') { if (!TABS.includes(k)) return false; hubTab = k; pickOpen = null; if (sheetMode !== 'hub') openHub(k); }
+  } else if (act === 'tab') { if (!TABS.includes(k)) return false; hubTab = k; pickOpen = null; if (sheetMode !== 'hub') openHub(k); if (k === 'rang' && rangApp() && (RANG.on || SET.rangAsk) && !rangLoad && (!rangData || Date.now() - rangAt > 30000)) rangFetch(); }
+  else if (act === 'rang') { save(true); sfx('tap'); showRang('play'); return true; }
+  else if (act === 'rangref') { rangFetch(); sfx('tap'); return true; }
   else if (act === 'close') { sheetSup = sheetMan ? null : sheetMode; sheetMan = null; }
   else if (act === 'lup') {
     const c = LCOST[S.lager.lv - 1]; if (c === undefined || S.coins < c) return false;
@@ -9079,6 +9238,8 @@ function doAct(act, k, i, v) {
     let v = 0; for (const r of act === 'sell' ? [k] : Object.keys(S.lager.it)) v += sellFromLager(r, surplus(r));
     if (!v) return false; statC(v); popCoins(pl.x, pl.y - 60, v); sfx('coinbig');
   } else if (act === 'ksell') S.kran.sell = !S.kran.sell;
+  else if (act === 'spende') { const c = spendeCost(); if (!logOn() || S.coins < c) return false; S.coins -= c; META.don = (META.don || 0) + 1; META.mp += 1; META.mpAll += 1; saveMeta(); fx('+1 ⭐ von der Gilde!'); }
+  else if (act === 'schmuck') { const lv = S.schmuck || 0, nx = SCHMUCK[lv]; if (!nx || tierNow() < nx.tier || S.coins < nx.cost) return false; S.coins -= nx.cost; S.schmuck = lv + 1; flushChunks(); fx(nx.name + ' im Dorf!'); banner = { a: nx.name + '!', b: 'Das Dorf wird schöner: +1 Einwohner, Helfer +2 % schneller', life: 3, age: 0 }; }
   else if (act === 'mrec') { if (!BLD[k]) return false; const n = Number(v); if (v !== 'auto' && v !== 'pause' && !(Number.isInteger(n) && BLD[k].rec[n])) return false; bst(k).rec = v === 'auto' || v === 'pause' ? v : n; }
   else if (act === 'mspd' || act === 'mbat') {
     if (!BLD[k]) return false;
@@ -9149,6 +9310,7 @@ function loop(now) {
   requestAnimationFrame(loop);   // zuerst: ein Fehler darf das Spiel nie anhalten
   try { perfGuard(now - last, now); } catch (e) {}
   const dt = Math.min(0.033, Math.max(0, (now - last) / 1000)); last = now;
+  if (document.hidden && state === 'play' && PAUSE()) return;   // 4.5: im Hintergrund läuft im Pause-Modus nichts weiter
   try { update(dt); } catch (e) { if (loopErr++ < 3) console.warn('update', e); }
   try { draw(); } catch (e) { if (loopErr++ < 3) console.warn('draw', e); try { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; } catch (e2) {} }
   if (state === 'play') {
@@ -9163,7 +9325,7 @@ function loop(now) {
 // ---------- 4.3: Spielstand übertragen (Code zum Kopieren und Einfügen) ----------
 // Format: "SFL1:" + CRC32 (8 Hex) + ":" + base64url( LZW( UTF-8( JSON ) ) ). JSON: { app, v, ver, t, k: { Schlüssel: Inhalt } }
 const SFL_PRE = 'SFL1:', IMPB = 'schuerfland-import-backup-';
-function sflKeys() { const out = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k === HOME_KEY || k === MKEY || k === SKEY || /^schuerfland-insel-\d+$/.test(k)) out.push(k); } } catch (e) {} return out.sort(); }
+function sflKeys() { const out = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k === HOME_KEY || k === MKEY || k === SKEY || k === RKEY || /^schuerfland-insel-\d+$/.test(k)) out.push(k); } } catch (e) {} return out.sort(); }
 const LZW_W = n => { let w = 9; while ((1 << w) < n && w < 16) w++; return w; };
 function lzwPack(src) {
   const out = []; let acc = 0, nb = 0, next = 257, cur = -1; const dict = new Map();
@@ -9221,7 +9383,7 @@ function sflDecode(txt) {
   let data;
   try { data = JSON.parse(unutf8(lzwUnpack(unb64u(m[2])))); } catch (e) { return { err: 'Der Code lässt sich nicht lesen. Bitte ganz neu kopieren.' }; }
   if (!data || data.app !== 'schuerfland' || !data.k || typeof data.k !== 'object') return { err: 'Der Code enthält keinen Schürfland-Spielstand.' };
-  const keys = Object.keys(data.k).filter(k => k === HOME_KEY || k === MKEY || k === SKEY || /^schuerfland-insel-\d+$/.test(k));
+  const keys = Object.keys(data.k).filter(k => k === HOME_KEY || k === MKEY || k === SKEY || k === RKEY || /^schuerfland-insel-\d+$/.test(k));
   if (!keys.some(k => k === HOME_KEY || /^schuerfland-insel-\d+$/.test(k))) return { err: 'Im Code ist kein Spielstand.' };
   return { data, keys };
 }
@@ -9247,8 +9409,9 @@ function sflApply(dec) {
   } catch (e) { return 'Kein Platz für die Sicherung. Es wurde nichts geändert.'; }
   booted = false; resetting = true;   // ab jetzt schreibt dieses Fenster nichts mehr selbst
   try {
-    for (const k of sflKeys()) if (k !== SKEY) { ls.removeItem(k); ls.removeItem(k + '-prev'); }
-    for (const k of dec.keys) { const v = dec.data.k[k]; let str; if (v && v.__raw !== undefined) str = String(v.__raw); else { if (k !== MKEY && k !== SKEY) v.lastSeen = now; str = JSON.stringify(v); } ls.setItem(k, str); }
+    // Einstellungen und Rangliste-Kennung bleiben, wenn der Code keine eigenen mitbringt
+    for (const k of sflKeys()) if (k !== SKEY && (k !== RKEY || dec.keys.includes(RKEY))) { ls.removeItem(k); ls.removeItem(k + '-prev'); }
+    for (const k of dec.keys) { const v = dec.data.k[k]; let str; if (v && v.__raw !== undefined) str = String(v.__raw); else { if (k !== MKEY && k !== SKEY && k !== RKEY) v.lastSeen = now; str = JSON.stringify(v); } ls.setItem(k, str); }
   } catch (e) {
     try { for (const k of sflKeys()) ls.removeItem(k); for (const k in old) if (old[k] != null) ls.setItem(k, old[k]); } catch (e2) {}
     booted = true; resetting = false;
@@ -9259,7 +9422,7 @@ function sflApply(dec) {
 }
 function xferHtml() {
   return `<details class="news" id="xfer"><summary>⇄ Spielstand übertragen ▾</summary><div class="xfer">
-    <small class="note">Für die App oder ein anderes Gerät: Code kopieren und dort bei „Code einfügen“ einsetzen. Alle Inseln und Einstellungen kommen mit.</small>
+    <small class="note">Für die App oder ein anderes Gerät: Code kopieren und dort bei „Code einfügen“ einsetzen. Alle Inseln, Einstellungen und dein Ranglisten-Eintrag kommen mit.</small>
     <div class="row2"><button class="ghost" id="xcopy">Code kopieren</button><button class="ghost" id="xpaste">Code einfügen</button></div>
     <button class="ghost" id="xshare" hidden>Als Datei teilen</button>
     <textarea id="xcode" hidden spellcheck="false" autocomplete="off" aria-label="Spielstand-Code"></textarea>
@@ -9307,7 +9470,294 @@ function start() {
   last = performance.now(); save(false);
   if (!S.done.lager && !(S.paid.lager && S.paid.lager.holz)) banner = ISL ? { a: 'Willkommen: ' + ISL.name + '!', b: 'Neue Insel: erst Holz fürs Lager sammeln', life: 3.6, age: 0 } : { a: 'Willkommen!', b: 'Sammle Holz für das Lager im Dorf', life: 3.2, age: 0 };
 }
+// ---------- 4.5: Spielername, Dorfname und Online-Rangliste ----------
+// Nichts wird gesendet, bevor man in der Rangliste „Mitmachen“ wählt. Läuft das Spiel nicht als App (window.SFL_APP fehlt,
+// z. B. im Artifact-Fenster, wo fremde Adressen gesperrt sind), gibt es nur einen Hinweis auf die App.
+const RKEY = 'schuerfland-rang';
+const RANG_URL = 'https://mzhhuvorzmaypglbgppe.supabase.co', RANG_KEY = 'sb_publishable_sx8E-Wbz7eM1GBIwd2eB4Q_8hG6bSbL';
+const APP_URL = 'stefanodenthal.github.io/schuerfland';
+const TIERIC = ['🛖', '🏡', '🏘', '🏙', '⚓'];
+const RANG0 = () => ({ id: null, secret: null, on: false, del: false, rang: 0, gesamt: 0, sent: '', bad: '' });
+function rangRead(r) {
+  r = r && typeof r === 'object' && !Array.isArray(r) ? r : {};
+  const ok = typeof r.id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(r.id) && typeof r.secret === 'string' && r.secret.length >= 32 && r.secret.length <= 128;
+  if (!ok) return RANG0();
+  return { id: r.id.toLowerCase(), secret: r.secret, on: r.on === true, del: r.del === true, rang: int(r.rang, 0, 1e9, 0), gesamt: int(r.gesamt, 0, 1e9, 0), sent: typeof r.sent === 'string' ? r.sent.slice(0, 300) : '', bad: typeof r.bad === 'string' ? r.bad.slice(0, 20) : '' };
+}
+let RANG = (() => { try { return rangRead(JSON.parse(localStorage.getItem(RKEY) || 'null')); } catch (e) { return RANG0(); } })();
+function saveRang() { try { if (!RANG.id) localStorage.removeItem(RKEY); else localStorage.setItem(RKEY, JSON.stringify(RANG)); } catch (e) {} }
+const rangApp = () => !!APP && typeof fetch === 'function';
+const rangOffline = () => { try { return navigator.onLine === false; } catch (e) { return false; } };
+// Zufällige Kennung (UUID v4) und ein Geheimnis (40 Zeichen): nur dieses Gerät (und ein übertragener Spielstand) kann den Eintrag ändern
+function rangIdent() {
+  if (RANG.id) return;
+  const rb = n => { const b = new Uint8Array(n); try { crypto.getRandomValues(b); } catch (e) { for (let i = 0; i < n; i++) b[i] = Math.floor(Math.random() * 256); } return b; };
+  let id = ''; try { if (window.crypto && crypto.randomUUID) id = String(crypto.randomUUID()); } catch (e) {}
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)) { const b = rb(16); b[6] = b[6] & 15 | 64; b[8] = b[8] & 63 | 128; const h = Array.from(b, x => x.toString(16).padStart(2, '0')).join(''); id = h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20); }
+  RANG = { ...RANG0(), id: id.toLowerCase(), secret: b64u(rb(30)) };
+}
+// Aufruf einer Datenbank-Funktion. Wirft nie: { ok: true, data } | { ok: false, data } | { ok: false, net: true }
+function rangRpc(fn, body, keep) {
+  if (!rangApp() || rangOffline()) return Promise.resolve({ ok: false, net: true });
+  let ctl = null, tm = 0;
+  try { ctl = new AbortController(); tm = setTimeout(() => { try { ctl.abort(); } catch (e) {} }, 9000); } catch (e) { ctl = null; }
+  let p;
+  try { p = fetch(RANG_URL + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: RANG_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(body), keepalive: !!keep, signal: ctl ? ctl.signal : undefined, cache: 'no-store', credentials: 'omit' }); }
+  catch (e) { clearTimeout(tm); return Promise.resolve({ ok: false, net: true }); }
+  return Promise.resolve(p).then(r => r.text().then(t => { let d = null; try { d = JSON.parse(t); } catch (e) {} return r.ok ? { ok: true, data: d } : { ok: false, http: r.status, data: d }; }))
+    .then(x => { clearTimeout(tm); return x; }, () => { clearTimeout(tm); return { ok: false, net: true }; });
+}
+// Punkte für die Rangliste: belohnt Fortschritt, nicht Horten oder Warten.
+//   Hauptziele der Heimatinsel: je 100 + 15 × Platz in der Zielkette (spätere Ziele zählen mehr; alle 31 zusammen 10.075)
+//   Dorfstufe: 400 × (Stufe − 1)², Hafenstadt = 6.400
+//   Tiefenmine: 15 je tiefste Etage + 250 je geschaffte Herausforderung (alle 10 Etagen), beste Insel zählt
+//   Andere Inseln: 1.500 je fertigem Wunder + 25 je fertigem Hauptziel
+//   Münzen (alle Inseln): 100 × log10(1 + Münzen), höchstens 600 (eine Million Münzen bringt so viel wie zwei späte Ziele)
+// Jeder Teil wächst nur mit dem Fortschritt; Münzen sind gedeckelt und logarithmisch, Warten bringt fast nichts.
+const PUNKTE_TXT = ['Jedes fertige Hauptziel: 100 Punkte, spätere Ziele mehr (bis 550)', 'Dorfstufe: 400 × (Stufe − 1)², Hafenstadt 6.400', 'Tiefenmine: 15 je Etage, 250 je Herausforderung', 'Andere Inseln: 1.500 je Wunder, 25 je Ziel', 'Münzen zählen wenig: höchstens 600 Punkte'];
+function slotPts(o, home) {
+  const d = obj(o && o.done), D = obj(o && o.deep); let z = 0, i = 0;
+  for (const p of PLATES) { if (p.opt) continue; if (d[p.id] === true) z += home ? 100 + 15 * i : 25; i++; }
+  return { z, tier: 1 + TIERS.filter(id => d[id] === true).length, max: int(D.max, 0, 1e6, 0), cp: int(D.cp, 0, 1e6, 0), wonder: d.turm === true, coins: Math.max(0, Math.floor(Number(o && o.coins) || 0)) };
+}
+function punkte() {
+  const H = slotPts(ISL ? readSlot(0) : S, true);
+  let iz = 0, wonders = 0, max = H.max, cp = H.cp, coins = H.coins;
+  for (const it of META.islands) { const o = ISL && it.n === ISL.n ? S : readSlot(it.n); if (!o) continue; const q = slotPts(o, false); iz += q.z; if (q.wonder) wonders++; max = Math.max(max, q.max); cp = Math.max(cp, q.cp); coins += q.coins; }
+  const coinP = Math.min(600, Math.round(100 * Math.log10(1 + coins)));
+  const pts = H.z + 400 * (H.tier - 1) * (H.tier - 1) + 15 * Math.min(max, 2000) + 250 * Math.floor(Math.min(cp, 2000) / 10) + 1500 * wonders + iz + coinP;
+  // Grenzen wie in der Datenbank: Punkte ≤ 1 Mrd, Münzen ≤ 1 Bio, Tiefe ≤ 100.000
+  return { punkte: clamp(Math.round(pts), 0, 1e9), stufe: clamp(H.tier, 0, 5), muenzen: Math.min(coins, 1e12), tiefe: Math.min(max, 100000), inseln: clamp(META.islands.length, 0, 50) };
+}
+function rangPayload() { const P = punkte(); return { p_id: RANG.id, p_secret: RANG.secret, p_name: SET.pname, p_dorf: SET.dorf || null, p_punkte: P.punkte, p_stufe: P.stufe, p_muenzen: P.muenzen, p_tiefe: P.tiefe, p_inseln: P.inseln, p_version: VERSION }; }
+const rangSig = b => [b.p_name, b.p_dorf, b.p_punkte, b.p_stufe, b.p_tiefe, b.p_inseln, Number(b.p_muenzen).toPrecision(2)].join('|');
+const RANG_ERR = {
+  name: 'Der Spielername passt nicht: 2 bis 16 Zeichen, nur Buchstaben, Ziffern, Leerzeichen und . _ -',
+  dorf: 'Der Dorfname passt nicht: 2 bis 20 Zeichen, nur Buchstaben, Ziffern, Leerzeichen und . _ -',
+  name_vergeben: 'Diesen Namen gibt es schon. Bitte einen anderen wählen.',
+  zu_oft: 'Kurz warten: höchstens alle 20 Sekunden. Es geht gleich von selbst weiter.',
+  fremd: 'Dieser Eintrag gehört zu einem anderen Gerät.',
+  werte: 'Die Werte wurden abgelehnt.', ungueltig: 'Die Anfrage wurde abgelehnt.',
+  net: 'Keine Verbindung. Sobald du online bist, wird gesendet.',
+};
+let rangLastT = -1e12, rangBusy = false, rangQ = false, rangTm = 0, rangTickT = 0, rangView = null;
+const RANG_GAP = 20500;
+function rangLater(ms) { if (rangTm) return; rangTm = setTimeout(() => { rangTm = 0; if (rangQ) rangSubmit('später'); }, Math.max(500, ms)); }
+// Meldet den Stand (gedrosselt: höchstens alle 20 s, nur wenn sich etwas geändert hat). Gibt immer ein Promise zurück, wirft nie.
+function rangSubmit(why, keep) {
+  try {
+    if (!RANG.on || !RANG.id || RANG.del || !SET.pname || !rangApp()) return Promise.resolve({ skip: true });
+    if (/^(name|dorf|name_vergeben|fremd)$/.test(RANG.bad) && why !== 'force') return Promise.resolve({ skip: true, fehler: RANG.bad });
+    const now = Date.now();
+    if (rangBusy || now - rangLastT < RANG_GAP) { rangQ = true; rangLater(RANG_GAP - (now - rangLastT) + 200); return Promise.resolve({ queued: true }); }
+    const b = rangPayload(), sig = rangSig(b);
+    if (sig === RANG.sent && why !== 'force') { rangQ = false; return Promise.resolve({ same: true }); }
+    if (rangOffline()) { rangQ = true; return Promise.resolve({ ok: false, net: true }); }
+    rangBusy = true; rangLastT = now; rangQ = false;
+    return rangRpc('rangliste_melden', b, keep).then(r => {
+      rangBusy = false;
+      const d = r.data && typeof r.data === 'object' ? r.data : null;
+      if (r.ok && d && d.ok) {
+        const old = RANG.rang; RANG.sent = sig; RANG.rang = int(d.rang, 0, 1e9, 0); RANG.gesamt = int(d.gesamt, 0, 1e9, RANG.gesamt); RANG.bad = ''; saveRang();
+        if (old && RANG.rang && RANG.rang < old) rangClimb(RANG.rang);
+        rangRefreshView(); return { ok: true, rang: RANG.rang, gesamt: RANG.gesamt };
+      }
+      if (d && d.ok === false) {
+        const f = String(d.fehler || 'ungueltig');
+        if (f === 'zu_oft') { rangQ = true; rangLater(RANG_GAP); }
+        else { RANG.bad = f; if (!/^(name|dorf|name_vergeben|fremd)$/.test(f)) RANG.sent = sig; saveRang(); }
+        rangRefreshView(); return { ok: false, fehler: f };
+      }
+      rangQ = true; rangRefreshView(); return { ok: false, net: true };
+    }, () => { rangBusy = false; rangQ = true; return { ok: false, net: true }; });
+  } catch (e) { rangBusy = false; return Promise.resolve({ ok: false, net: true }); }
+}
+function rangClimb(n) { if (state === 'play') toast('🏆 Du bist auf Platz ' + fmt(n) + ' aufgestiegen!', 2600); else rangView && (rangView.climb = n); }
+// Löschen (auch nachgeholt, wenn gerade keine Verbindung besteht)
+function rangDelete() {
+  if (!RANG.id) return Promise.resolve(true);
+  RANG.on = false; RANG.del = true; saveRang();
+  return rangRpc('rangliste_loeschen', { p_id: RANG.id, p_secret: RANG.secret }).then(r => { if (r.net) return false; RANG = RANG0(); saveRang(); rangData = null; rangMe = null; return true; });
+}
+// Alle 30 s: liegen gebliebenes nachholen, alle 3 Minuten beim Spielen den Stand melden
+setInterval(() => {
+  try {
+    if (RANG.del) { if (!rangOffline()) rangDelete(); return; }
+    if (!RANG.on) return;
+    rangTickT += 30;
+    if (rangQ || (rangTickT >= 180 && state === 'play' && !document.hidden)) { rangTickT = 0; rangSubmit('zeit'); }
+  } catch (e) {}
+}, 30000);
+window.addEventListener('online', () => { try { if (RANG.del) rangDelete(); else if (rangQ) rangSubmit('online'); } catch (e) {} });
+// Liste holen: die besten 50 und der eigene Platz
+let rangData = null, rangMe = null, rangErr = '', rangLoad = false, rangAt = 0;
+function rangFetch() {
+  if (rangLoad) return Promise.resolve();
+  rangLoad = true; rangErr = ''; rangRefreshView();
+  const me = RANG.on && RANG.id && !RANG.del ? rangRpc('rangliste_platz', { p_id: RANG.id }) : Promise.resolve(null);
+  return Promise.all([rangRpc('rangliste_top', { p_limit: 50 }), me]).then(([a, b]) => {
+    rangLoad = false;
+    if (a.ok && Array.isArray(a.data)) { rangData = a.data.filter(x => x && typeof x === 'object').slice(0, 50); rangAt = Date.now(); }
+    else rangErr = a.net ? 'net' : 'srv';
+    if (b && b.ok && b.data && b.data.ok) { rangMe = b.data; const old = RANG.rang; RANG.rang = int(b.data.rang, 0, 1e9, 0); RANG.gesamt = int(b.data.gesamt, 0, 1e9, 0); saveRang(); if (old && RANG.rang && RANG.rang < old) rangClimb(RANG.rang); }
+    rangRefreshView();
+  }, () => { rangLoad = false; rangErr = 'net'; rangRefreshView(); });
+}
+const big = n => { n = Math.max(0, Number(n) || 0); return n >= 1e9 ? (n / 1e9).toFixed(1).replace('.', ',') + ' Mrd' : n >= 1e6 ? (n / 1e6).toFixed(1).replace('.', ',') + ' Mio' : n >= 1e4 ? Math.round(n / 1e3) + ' Tsd' : fmt(n); };
+function rangRows(list, max) {
+  let h = '', mine = false;
+  for (const r of list.slice(0, max)) {
+    const me = RANG.on && r.id === RANG.id; if (me) mine = true;
+    const tier = int(r.stufe, 1, 5, 1);
+    h += `<div class="rrow${me ? ' me' : ''}"><span class="rp">${int(r.pos, 0, 1e9, 0)}</span><span class="rn"><b>${esc(String(r.name || '').slice(0, 16))}</b>${r.dorf ? `<small>${esc(String(r.dorf).slice(0, 20))}</small>` : ''}</span><span class="rt" title="${TIERNAME[tier - 1]}">${TIERIC[tier - 1]}</span><span class="rs"><b>${fmt(Number(r.punkte) || 0)}</b><small>⛏ ${fmt(Number(r.tiefe) || 0)} · ${coinH}${big(r.muenzen)}</small></span></div>`;
+  }
+  return { h, mine };
+}
+function rangListHtml(max) {
+  if (rangLoad && !rangData) return '<div class="rinfo">Lädt …</div>';
+  if (rangErr && !rangData) return `<div class="rinfo bad">${rangErr === 'net' ? (rangOffline() ? 'Du bist offline. ' : 'Die Rangliste ist gerade nicht erreichbar. ') : 'Die Rangliste antwortet gerade nicht. '}Später nochmal versuchen.</div><p class="small sel">Die Rangliste gibt es in der App: ${APP_URL}</p>`;
+  if (!rangData) return '<div class="rinfo">Lädt …</div>';
+  if (!rangData.length) return '<div class="rinfo">Noch niemand dabei. Sei die oder der Erste!</div>';
+  const { h, mine } = rangRows(rangData, max);
+  let foot = '';
+  if (RANG.on && !mine && RANG.rang) foot = `<div class="rrow me pin"><span class="rp">${fmt(RANG.rang)}</span><span class="rn"><b>Dein Platz: ${fmt(RANG.rang)} von ${fmt(RANG.gesamt)}</b>${rangMe && rangMe.punkte != null ? `<small>${fmt(Number(rangMe.punkte) || 0)} Punkte</small>` : ''}</span></div>`;
+  return `<div class="rlist">${h}</div>${foot}${rangErr ? '<div class="rinfo bad">Keine Verbindung: das ist der letzte Stand.</div>' : ''}`;
+}
+let rangNote = '', rangNoteT = -1e12;   // kurze Meldung (z. B. nach dem Abmelden), überdeckt den Status ein paar Sekunden
+const rangStatus = () => rangNote && Date.now() - rangNoteT < 8000 ? rangNote : RANG.del ? 'Abmeldung wird gesendet …' : !RANG.on ? 'Du machst noch nicht mit.' : RANG.bad && RANG_ERR[RANG.bad] ? RANG_ERR[RANG.bad] : RANG.rang ? `Du: ${esc(SET.pname)} · Platz ${fmt(RANG.rang)} von ${fmt(RANG.gesamt)}` : `Du: ${esc(SET.pname)} · ${rangQ || rangBusy ? 'wird gemeldet …' : 'gemeldet'}`;
+// Karte (aus Menü oder Spiel): Hinweis außerhalb der App, beim ersten Mal die Namenskarte, sonst die Liste
+function showRang(from, view) {
+  returnTo = from; state = 'rang';
+  if (!rangApp()) {
+    rangView = null;
+    showCard(`<h2>🏆 Rangliste</h2>
+      <p class="made sel">Die Rangliste gibt es in der App: <b>${APP_URL}</b></p>
+      <a class="ghost lnk" href="https://${APP_URL}/" target="_blank" rel="noopener">App öffnen ↗</a>
+      <p class="small">Dort kannst du mitmachen und dich mit anderen messen. Deinen Spielstand nimmst du mit: Einstellungen → Spielstand übertragen. Spieler- und Dorfnamen legst du in den Einstellungen fest.</p>
+      <button class="big" id="back">${from === 'play' ? 'Weiter' : 'Zurück'}</button>`);
+    $('back').onclick = rangBack; return;
+  }
+  if (!view) view = !RANG.on && !SET.rangAsk && !RANG.del ? 'join' : 'list';
+  rangView = { from, view };
+  if (view === 'join') {
+    const edit = RANG.on;
+    showCard(`<h2>🏆 Rangliste</h2>
+      <p class="small">${edit ? 'Name oder Dorf ändern.' : 'Miss dich mit anderen Spielern! Wähle dafür einen Spielernamen.'}</p>
+      <div class="form">
+        <label for="rn-name">Spielername</label><input id="rn-name" class="txt" maxlength="16" autocomplete="nickname" autocapitalize="words" spellcheck="false" value="${esc(SET.pname)}" placeholder="z. B. Erzgräberin">
+        <label for="rn-dorf">Dorfname <small>freiwillig</small></label><input id="rn-dorf" class="txt" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(SET.dorf)}" placeholder="z. B. Bergheim">
+        <div class="msg" id="rn-msg" role="status" aria-live="polite">${RANG.bad && RANG_ERR[RANG.bad] ? RANG_ERR[RANG.bad] : ''}</div>
+      </div>
+      <button class="big" id="rn-join">${edit ? 'Speichern' : 'Mitmachen'}</button>
+      <button class="ghost" id="rn-look">${edit ? 'Abbrechen' : 'Erst mal nur ansehen'}</button>
+      <small class="note">Gesendet werden nur Spielername, Dorfname, Punkte, Dorfstufe, Münzen, Tiefe und Zahl der Inseln. Aufhören geht jederzeit.</small>`);
+    const msg = $('rn-msg'), btn = $('rn-join');
+    if (RANG.bad) msg.className = 'msg bad';
+    btn.onclick = () => rangJoin($('rn-name').value, $('rn-dorf').value, msg, btn);
+    $('rn-look').onclick = () => { SET.rangAsk = true; saveSet(); sfx('tap'); showRang(from, 'list'); };
+    return;
+  }
+  showCard(`<div class="hd rhd"><h2>🏆 Rangliste</h2><button class="x" id="rn-ref" aria-label="Aktualisieren">↻</button></div>
+    <p class="small" id="rn-st">${rangStatus()}</p>
+    <div id="rn-list" class="rwrap">${rangListHtml(50)}</div>
+    <div class="rbtn">${RANG.on ? '<button class="ghost" id="rn-edit">Name ändern</button><button class="danger" id="rn-out">Nicht mehr teilnehmen</button>' : RANG.del ? '' : '<button class="ghost" id="rn-in">Mitmachen</button>'}</div>
+    <details class="news"><summary>So zählen die Punkte ▾</summary><ul>${PUNKTE_TXT.map(t => `<li>${t}</li>`).join('')}</ul></details>
+    <button class="big stick" id="back">${from === 'play' ? 'Weiter' : 'Zurück'}</button>`);
+  $('back').onclick = rangBack;
+  $('rn-ref').onclick = () => { sfx('tap'); rangFetch(); };
+  if ($('rn-edit')) $('rn-edit').onclick = () => showRang(from, 'join');
+  if ($('rn-in')) $('rn-in').onclick = () => showRang(from, 'join');
+  const out = $('rn-out');
+  if (out) out.onclick = () => {
+    if (!out.dataset.sure) { out.dataset.sure = '1'; out.classList.add('sure'); out.textContent = 'Wirklich? Dein Eintrag wird gelöscht. Nochmal tippen'; return; }
+    out.disabled = true; out.textContent = 'Wird gelöscht …';
+    rangDelete().then(ok => { rangNote = ok ? 'Dein Eintrag ist gelöscht. Du machst nicht mehr mit.' : 'Keine Verbindung: die Abmeldung wird nachgeholt.'; rangNoteT = Date.now(); if (state === 'rang') showRang(from, 'list'); });
+  };
+  if (!rangLoad && (!rangData || Date.now() - rangAt > 15000)) rangFetch();
+}
+function rangBack() { rangView = null; sfx('ui'); if (returnTo === 'play') start(); else showMenu(); }
+// Nur die Liste neu zeichnen (die Eingabefelder der Namenskarte bleiben unberührt)
+function rangRefreshView() {
+  try {
+    if (state === 'play' && sheetMode === 'hub' && hubTab === 'rang') { sheetKey = ''; updateSheet(); }
+    if (state !== 'rang' || !rangView || rangView.view !== 'list') return;
+    const l = $('rn-list'), st = $('rn-st'), rf = $('rn-ref');
+    if (l) l.innerHTML = rangListHtml(50);
+    if (st) st.innerHTML = rangStatus();
+    if (rf) rf.classList.toggle('spin', rangLoad);
+  } catch (e) {}
+}
+function rangJoin(name, dorf, msg, btn) {
+  const say2 = (t, cls) => { msg.textContent = t; msg.className = 'msg' + (cls ? ' ' + cls : ''); };
+  const n = cleanName(name, 16), dRaw = String(dorf || '').trim(), d = dRaw ? cleanName(dRaw, 20) : '';
+  if (!n) { say2(RANG_ERR.name, 'bad'); sfx('warn'); return; }
+  if (dRaw && !d) { say2(RANG_ERR.dorf, 'bad'); sfx('warn'); return; }
+  const changed = n !== SET.pname || d !== SET.dorf;
+  SET.pname = n; SET.dorf = d; SET.rangAsk = true; saveSet(); lastHud = '';
+  rangIdent(); const was = RANG.on; RANG.on = true; RANG.del = false; if (changed || !was) { RANG.bad = ''; RANG.sent = ''; } saveRang();
+  btn.disabled = true; say2('Wird gemeldet …', '');
+  rangSubmit('force').then(r => {
+    if (state !== 'rang' || !rangView) return;
+    if (r && r.fehler && RANG_ERR[r.fehler] && /^(name|dorf|name_vergeben|fremd)$/.test(r.fehler)) {
+      btn.disabled = false; say2(RANG_ERR[r.fehler], 'bad'); sfx('warn');
+      if (r.fehler === 'fremd') { RANG = RANG0(); rangIdent(); RANG.on = was; saveRang(); say2(RANG_ERR.fremd + ' Tippe nochmal: du bekommst einen neuen Eintrag.', 'bad'); }
+      else if (!was) { RANG.on = false; saveRang(); }   // beim ersten Mal: erst mitmachen, wenn der Name passt
+      return;
+    }
+    sfx('buy'); rangData = null; showRang(rangView.from, 'list');
+    const st = $('rn-st'); if (st && r && r.net) st.textContent = RANG_ERR.net; else if (st && r && r.queued) st.textContent = 'Gespeichert. Wird in ein paar Sekunden gemeldet.';
+  });
+}
+// Kleiner Bereich im Lager-Bogen (Reiter 🏆)
+function rangSheetHtml() {
+  let h = head('Rangliste', RANG.on && RANG.rang ? 'Platz ' + fmt(RANG.rang) : '') + tabs();
+  if (!rangApp()) return h + `<small class="note sel">Die Rangliste gibt es in der App: ${APP_URL}</small><div class="pills"><button class="pill" data-act="rang" data-free="1">🏆 Mehr dazu</button></div>`;
+  h += `<small class="note">${rangStatus()}</small>`;
+  if (rangData && rangData.length) { const { h: rows } = rangRows(rangData, 5); h += `<div class="rlist sm">${rows}</div>`; }
+  else if (rangLoad) h += '<div class="rinfo">Lädt …</div>';
+  return h + `<div class="pills"><button class="pill on" data-act="rang" data-free="1">🏆 ${RANG.on ? 'Ganze Rangliste' : 'Mitmachen'}</button><button class="pill" data-act="rangref" data-free="1">↻ Aktualisieren</button></div>`;
+}
+const rangKey = () => [RANG.on, RANG.rang, RANG.gesamt, RANG.bad, RANG.del, rangAt, rangLoad, rangErr, SET.pname].join('|');
+// Spielername und Dorfname in den Einstellungen (auch ohne Rangliste: der Dorfname steht am Ortsschild und am Rathaus)
+function namesHtml() {
+  return `<div class="form opts2">
+    <label for="set-pname">Spielername</label><input id="set-pname" class="txt" maxlength="16" autocomplete="nickname" autocapitalize="words" spellcheck="false" value="${esc(SET.pname)}" placeholder="für die Rangliste">
+    <label for="set-dorf">Dorfname <small>steht am Ortsschild</small></label><input id="set-dorf" class="txt" maxlength="20" autocomplete="off" autocapitalize="words" spellcheck="false" value="${esc(SET.dorf)}" placeholder="z. B. Bergheim">
+    <div class="row2"><button class="ghost" id="set-nsave">Namen speichern</button></div>
+    <div class="msg" id="set-nmsg" role="status" aria-live="polite"></div></div>`;
+}
+function namesWire() {
+  const b = $('set-nsave'), msg = $('set-nmsg'); if (!b) return;
+  const say2 = (t, cls) => { msg.textContent = t; msg.className = 'msg' + (cls ? ' ' + cls : ''); };
+  b.onclick = () => {
+    const nr = $('set-pname').value.trim(), dr = $('set-dorf').value.trim(), n = nr ? cleanName(nr, 16) : '', d = dr ? cleanName(dr, 20) : '';
+    if (nr && !n) { say2(RANG_ERR.name, 'bad'); sfx('warn'); return; }
+    if (dr && !d) { say2(RANG_ERR.dorf, 'bad'); sfx('warn'); return; }
+    if (!n && RANG.on) { say2('In der Rangliste brauchst du einen Spielernamen.', 'bad'); sfx('warn'); return; }
+    const changed = n !== SET.pname || d !== SET.dorf;
+    SET.pname = n; SET.dorf = d; saveSet(); $('set-pname').value = n; $('set-dorf').value = d; sfx('tap');
+    if (changed && RANG.on) { RANG.bad = ''; saveRang(); rangSubmit('force').then(r => { if (!msg.isConnected) return; if (r && r.fehler && RANG_ERR[r.fehler]) say2(RANG_ERR[r.fehler], 'bad'); else if (r && r.net) say2('Gespeichert. ' + RANG_ERR.net, 'ok'); else if (r && r.queued) say2('Gespeichert. Die Rangliste wird in ein paar Sekunden geändert.', 'ok'); else say2('Gespeichert und in der Rangliste geändert.', 'ok'); }); say2('Gespeichert …', 'ok'); }
+    else say2(changed ? 'Gespeichert.' : 'Nichts geändert.', 'ok');
+  };
+}
+const dorfName = () => ISL ? ISL.name : SET.dorf;
+// ⏸️ Pausiert: nach dem Zurückkommen (oder neuem Start) steht alles genau so, wie man es verlassen hat
+function showPaused() {
+  state = 'menu';
+  showCard(`<h2>⏸️ Pausiert</h2>
+    <p class="small">${dorfName() ? esc(dorfName()) + ' hat auf dich gewartet.' : 'Dein Dorf hat auf dich gewartet.'} Alles ist genau so, wie du es verlassen hast.</p>
+    <button class="big" id="go">Weiter</button>
+    <button class="ghost" id="menu">Zum Menü</button>
+    <small class="note">Beim Verlassen pausiert das Spiel. Umstellen: Einstellungen → Beim Verlassen.</small>`);
+  $('go').onclick = () => { sfx('ui'); start(); };
+  $('menu').onclick = showMenu;
+}
 const NEWS = [
+  '4.5: Beim Verlassen pausiert das Spiel jetzt (umstellbar in den Einstellungen)',
+  '4.5: Online-Rangliste in der App (🏆 im Menü): Spielername wählen, mitmachen, Plätze vergleichen. Dein Dorfname steht am Ortsschild und am Rathaus',
+  '4.5: Bäume wachsen langsamer nach, Holz will eingeteilt sein. Neu: der Förster pflanzt gefällte Bäume neu, die Gießkanne hat eine 4. Stufe',
+  '4.5: Münzen haben wieder Ziele: Dorf verschönern (mehr Einwohner, flinkere Helfer) und im Logbuch Spenden an die Gilde für ⭐. Der Händler verkauft 15 % statt 25 % teurer, sehr große Mengen drücken den Preis (nie unter 60 %)',
+  '4.5: Sägebots fällen jetzt echte Bäume in ihrem Gebiet. Gefällte Bäume, Felsen und Felder bleiben nach dem Neuladen, wie du sie verlassen hast',
   '4.4.2: Nach einem Update zeigt das Spiel beim ersten Start einmal, was neu ist',
   '4.4.1: Test-Update – dein Spielstand bleibt beim Aktualisieren vollständig erhalten',
   'Tag und Nacht: Morgenrot, goldene Stunde, Nächte mit Laternen, Fensterlicht, Glühwürmchen und Leuchtturm',
@@ -9339,7 +9789,7 @@ function showMenu() {
   const cont = S.started;
   showCard(`
     <h1 class="logo">Schürf<span>land</span></h1>
-    ${ISL ? `<p class="small">⛵ ${ISL.name} · ${THEMES[ISL.theme].name}</p>` : META.islands.length ? '<p class="small">🏠 Heimatinsel</p>' : ''}
+    ${ISL ? `<p class="small">⛵ ${esc(ISL.name)} · ${THEMES[ISL.theme].name}</p>` : SET.dorf ? `<p class="small dorfl">🏘 ${esc(SET.dorf)} · ${TIERNAME[tierNow() - 1]}${META.islands.length ? ' · Heimatinsel' : ''}</p>` : META.islands.length ? '<p class="small">🏠 Heimatinsel</p>' : ''}
     <div class="how">
       <b>Laufen</b><span>Finger auf den Bildschirm und ziehen.</span>
       <b>Sammeln</b><span>Neben Bäume und Felsen stellen: du arbeitest von allein.</span>
@@ -9355,17 +9805,21 @@ function showMenu() {
       <b>Tiefe</b><span>In der Mine führt ein Schacht hinab: Etage für Etage.</span>
       <b>📦</b><span>Oben antippen: Lager, Produktion, Helfer und Dorf.</span>
     </div></details>
-    <button class="ghost" id="opt">${GEAR}Einstellungen</button>
+    <div class="row2 mrow"><button class="ghost" id="rang">🏆 Rangliste</button><button class="ghost" id="opt">${GEAR}Einstellungen</button></div>
     <p class="ver">${verTxt()}</p>`);
   $('go').onclick = start;
   $('opt').onclick = () => showSettings('menu');
+  $('rang').onclick = () => { sfx('tap'); showRang('menu'); };
 }
 function showSettings(from) {
   returnTo = from; state = 'settings';
   const tg = (k, on, a, b) => `<button class="tog${on ? '' : ' off'}" data-set="${k}">${on ? a : b}</button>`;
   showCard(`
-    <h2>Einstellungen</h2>
+    <h2>${from === 'play' ? '⏸️ Pausiert' : 'Einstellungen'}</h2>
+    ${from === 'play' ? '<p class="small">Das Spiel wartet, bis du weitermachst.</p>' : ''}
     <div class="opts">
+      <div class="optc"><span>Beim Verlassen</span><div class="seg" role="group" aria-label="Beim Verlassen"><button class="pill${PAUSE() ? ' on' : ''}" data-leave="pause" aria-pressed="${PAUSE()}">⏸️ Pause</button><button class="pill${PAUSE() ? '' : ' on'}" data-leave="weiter" aria-pressed="${!PAUSE()}">Weiterarbeiten (max. 2 Std)</button></div>
+        <small class="note" id="leave-n">${PAUSE() ? 'Nichts läuft weiter, solange das Spiel zu ist.' : 'Helfer und Maschinen arbeiten weiter, höchstens 2 Std.'}</small></div>
       <div class="opt"><span>Ton</span>${tg('sound', SET.sound, 'An', 'Aus')}</div>
       ${[['sfx', 'Effekte'], ['amb', 'Umgebung'], ['mus', 'Musik']].map(([k, n]) => `<div class="optc"><label for="v-${k}"><span>${n}</span><span id="v-${k}-n">${Math.round(SET[k] * 100)} %</span></label><input type="range" class="sld" id="v-${k}" data-vol="${k}" min="0" max="100" step="5" value="${Math.round(SET[k] * 100)}" aria-label="${n} Lautstärke"></div>`).join('')}
       <div class="opt"><span>Vibration</span>${tg('vib', SET.vib, 'An', 'Aus')}</div>
@@ -9376,6 +9830,7 @@ function showSettings(from) {
       <div class="opt"><span>Bewegung reduzieren</span>${tg('calm', !!SET.calm, 'An', 'Aus')}</div>
     </div>
     <button class="big stick" id="back">${from === 'play' ? 'Weiter' : 'Zurück'}</button>
+    <details class="news" id="names"><summary>🏷 Spieler- und Dorfname ▾</summary>${namesHtml()}</details>
     ${xferHtml()}
     <details class="news"><summary>Neu in ${VERSION} ▾</summary><ul>
       ${newsLi()}
@@ -9394,7 +9849,12 @@ function showSettings(from) {
     const on = k === 'gfx' ? !LOW() : SET[k];
     b.classList.toggle('off', !on); b.textContent = k === 'gfx' ? (on ? 'Hoch' : 'Niedrig') : (on ? 'An' : 'Aus');
   });
-  xferWire();
+  xferWire(); namesWire();
+  card.querySelectorAll('[data-leave]').forEach(b => b.onclick = () => {
+    SET.leave = b.dataset.leave === 'weiter' ? 'weiter' : 'pause'; saveSet(); sfx('tap');
+    card.querySelectorAll('[data-leave]').forEach(x => { const on = x.dataset.leave === SET.leave; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    const n = $('leave-n'); if (n) n.textContent = PAUSE() ? 'Nichts läuft weiter, solange das Spiel zu ist.' : 'Helfer und Maschinen arbeiten weiter, höchstens 2 Std.';
+  });
   const r = $('reset');
   r.onclick = () => {
     if (r.dataset.sure) { try { localStorage.removeItem(KEY); localStorage.removeItem(PKEY); } catch (e) {} resetting = true; location.reload(); }
@@ -9424,10 +9884,13 @@ function showWelcome(r) {
 let hiddenAt = 0, resetting = false;
 document.addEventListener('visibilitychange', () => {
   if (resetting) return;
-  if (document.hidden) { hiddenAt = Date.now(); save(false); try { SND.suspend(); } catch (e) {} }
+  if (document.hidden) { hiddenAt = Date.now(); save(false); try { SND.suspend(); } catch (e) {} rangSubmit('weg', true); }
   else {
     last = performance.now(); try { if (SET.sound) SND.resume(); } catch (e) {}
-    if (hiddenAt && state === 'play') { const r = offlineCalc((Date.now() - hiddenAt) / 1000); if (r && r.any) { save(false); showWelcome(r); } }
+    if (hiddenAt && state === 'play') {
+      if (PAUSE()) { if (Date.now() - hiddenAt > 1500) { save(false); showPaused(); } }
+      else { const r = offlineCalc((Date.now() - hiddenAt) / 1000); if (r && r.any) { save(false); showWelcome(r); } }
+    }
     hiddenAt = 0;
   }
 });
@@ -9442,8 +9905,10 @@ booted = true;   // ab hier darf gespeichert werden
 if (metaFix) saveMeta();
 if (!walkable(pl.x, pl.y, 10)) { pl.x = START.x; pl.y = START.y; }
 camX = pl.x; camY = pl.y;
-const off = S.started && S.lastSeen > 0 ? offlineCalc((Date.now() - S.lastSeen) / 1000) : null;
-const afterNews = () => { if (off && off.any) { save(false); showWelcome(off); } else showMenu(); };
+nodeLoad(S.nd);
+// 4.5: Im Pause-Modus (Standard) läuft beim Schließen nichts weiter: kein Offline-Verdienst, keine Tageszeit, nichts wächst
+const off = S.started && S.lastSeen > 0 && !PAUSE() ? offlineCalc((Date.now() - S.lastSeen) / 1000) : null;
+const afterNews = () => { if (off && off.any) { save(false); showWelcome(off); } else if (S.started && PAUSE()) showPaused(); else showMenu(); };
 if (!S.started && !SET.seenVer) { SET.seenVer = VERSION; saveSet(); }   // ganz neue Spieler: kein Update-Fenster
 if (S.started && SET.seenVer !== VERSION) showNews(off); else afterNews();
 if (S.deep.at > 0 && S.done.schacht) setFloor(Math.min(S.deep.at, S.deep.max));
