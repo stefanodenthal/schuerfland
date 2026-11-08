@@ -190,7 +190,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.4', SAVE_V = 4.4;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.4.1', SAVE_V = 4.4;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -9325,6 +9325,7 @@ function showSettings(from) {
     <button class="big stick" id="back">${from === 'play' ? 'Weiter' : 'Zurück'}</button>
     ${xferHtml()}
     <details class="news"><summary>Neu in ${VERSION} ▾</summary><ul>
+      <li>4.4.1: Test-Update – dein Spielstand bleibt beim Aktualisieren vollständig erhalten</li>
       <li>Tag und Nacht: Morgenrot, goldene Stunde, Nächte mit Laternen, Fensterlicht, Glühwürmchen und Leuchtturm</li>
       <li>Jahreszeiten: Blüten im Frühling, buntes Laub im Herbst, Schnee im Winter, sanft spürbar beim Wachsen und Ernten</li>
       <li>Bäume fallen um, Felsen zerspringen, Spuren in Sand und Schnee, Rauch aus den Schornsteinen, Wind in den Kronen</li>
