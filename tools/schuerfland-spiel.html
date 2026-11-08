@@ -217,7 +217,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5.3', SAVE_V = 4.4;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5.4', SAVE_V = 4.4;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -5180,10 +5180,11 @@ const ROCK = {
   sternenerz:{ base: '#2a2444', gem: '#c9a4ff', n: 6, glow: '#b48cff' },
   schatz:    { base: '#6e5a3a', gem: '#ffd23d', n: 9, glow: '#ffcf3a' },
   fossil:    { base: '#b8a88a', fossil: true },
+  kohle:     { base: '#4a4750', gem: '#1d1b22', n: 6, gloss: true },
 };
 for (const t of [2, 3, 4, 5, 6, 7]) ROCK['hart' + t] = { base: '#4e4a56', hard: true };
 function rockSprite(kind, v, bare) {
-  const C = ROCK[kind], rr = NODE[kind].r + 3;
+  const C = ROCK[kind] || ROCK.rock, rr = NODE[kind].r + 3;
   return sprite('rk' + kind + v + (bare ? 'b' : ''), 76, 84, 38, 60, (g, s) => {
     const R = mulberry(500 + v * 31 + kind.length * 7);
     const rx = rr, ry = rr * .62, H = rr * .62;
@@ -8053,6 +8054,8 @@ function drawNodeOcc(n, behind) {
   if (a >= 0.999) { NFADE.delete(n); drawNode(n); return; }
   NFADE.set(n, a); ctx.save(); ctx.globalAlpha *= a; drawNode(n); ctx.restore();
 }
+let drawErrN = 0;
+function drawItemErr(e) { if (drawErrN++ < 3) console.warn('draw item', e && e.message); }
 function drawPlGhost(tool) { ctx.save(); ctx.globalAlpha = 0.5; drawPerson(pl, PLAYER_PAL); drawTool(pl, tool, pl.swing); ctx.restore(); }
 function drawNode(n) {
   const def = NODE[n.kind], growing = n.left <= 0, g = growing ? clamp(1 - n.regrowT / def.regrow, 0, 1) : 1;
@@ -8442,7 +8445,7 @@ function draw() {
   list.sort((a, b) => a[0] - b[0]);
   if (FANCY()) drawShadows(list);
   let plSeen = false, plHid = false;
-  for (const [ky, k, o] of list) {
+  for (const [ky, k, o] of list) try {
     if (plSeen && k !== 0 && k !== 1 && k !== 7 && k !== 14 && k !== 20 && !plHid && occBig(ky, k === 13 ? LAGER : o)) plHid = true;
     if (k === 0) drawNodeOcc(o, plSeen);
     else if (k === 1) drawHelper(o);
@@ -8461,7 +8464,7 @@ function draw() {
     else if (k === 15) drawSign();
     else if (k === 20) PFX.drawEntry(o);
     else drawShip();
-  }
+  } catch (e) { drawItemErr(e); }
   if (plHid) drawPlGhost(pl.tool);
   if (S.tech.netz) drawWires();
   if (drones.length) drawDrones();
@@ -8650,7 +8653,7 @@ function drawDeep() {
   PFX.drawSorted(list);
   list.sort((a, b) => a[0] - b[0]);
   let plSeen = false, plHid = false;
-  for (const [ky, k, o] of list) {
+  for (const [ky, k, o] of list) try {
     if (plSeen && (k === 1 || k === 3 || k === 4) && !plHid && occBig(ky, o, k === 1 ? o.r * 1.4 + 14 : 70) && ky - pl.y < (k === 1 ? o.r * 3 + 20 : 110)) plHid = true;
     if (k === 0) drawNode(o);
     else if (k === 1) blit(pillarSprite(o.r, ti, o.v), o.x, o.y);
@@ -8660,7 +8663,7 @@ function drawDeep() {
     else if (k === 5) blit(ladderSprite(F.th), o.x, o.y + 40);
     else if (k === 20) PFX.drawEntry(o);
     else drawTorch(o);
-  }
+  } catch (e) { drawItemErr(e); }
   if (plHid) drawPlGhost('pick');
   PFX.drawOver(ctx);
   if (!LOW()) { ctx.fillStyle = 'rgba(255,240,210,.5)'; for (const d of F.dust) if (inView(d.x, d.y, 10)) { ctx.globalAlpha = 0.25 + Math.sin(T * 2 + d.s) * 0.2; ctx.fillRect(d.x, d.y, 1.8, 1.8); } ctx.globalAlpha = 1; }
@@ -9743,6 +9746,7 @@ function showPaused() {
   $('menu').onclick = showMenu;
 }
 const NEWS = [
+  '4.5.4: Fehler in der Tiefenmine behoben: Kohlefelsen ließen deine Figur und andere Dinge verschwinden. Kohle ist jetzt als dunkler Fels mit glänzenden Brocken zu sehen',
   '4.5.3: Deine Figur verschwindet nicht mehr hinter Bäumen: Baumkronen davor werden durchsichtig, hinter Gebäuden siehst du einen Umriss',
   '4.5.2: Dorfstufen brauchen nur noch halb so tiefe Tiefenmine: Kleinstadt Etage 10, Stadt 20, Hafenstadt 30, Leuchtturm 40',
   '4.5.1: Tiefenmine: Den Aufzug baust du jetzt schon ab Etage 5 (800 Münzen). Damit bohrt der Kupferbohrer viel früher. Kupfer liegt ab Etage 1 in orangen Adern',
