@@ -206,7 +206,7 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
 </div>
 
 <script>
-window.SFL_APP = { version: "4.4.1-faf0b392", standalone: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true };
+window.SFL_APP = { version: "4.4.2-afb2b0ea", standalone: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true };
 </script>
 <script>
 (() => {
@@ -217,7 +217,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.4.1', SAVE_V = 4.4;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.4.2', SAVE_V = 4.4;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -9307,6 +9307,32 @@ function start() {
   last = performance.now(); save(false);
   if (!S.done.lager && !(S.paid.lager && S.paid.lager.holz)) banner = ISL ? { a: 'Willkommen: ' + ISL.name + '!', b: 'Neue Insel: erst Holz fürs Lager sammeln', life: 3.6, age: 0 } : { a: 'Willkommen!', b: 'Sammle Holz für das Lager im Dorf', life: 3.2, age: 0 };
 }
+const NEWS = [
+  '4.4.2: Nach einem Update zeigt das Spiel beim ersten Start einmal, was neu ist',
+  '4.4.1: Test-Update – dein Spielstand bleibt beim Aktualisieren vollständig erhalten',
+  'Tag und Nacht: Morgenrot, goldene Stunde, Nächte mit Laternen, Fensterlicht, Glühwürmchen und Leuchtturm',
+  'Jahreszeiten: Blüten im Frühling, buntes Laub im Herbst, Schnee im Winter, sanft spürbar beim Wachsen und Ernten',
+  'Bäume fallen um, Felsen zerspringen, Spuren in Sand und Schnee, Rauch aus den Schornsteinen, Wind in den Kronen',
+  'Natürlichere Grafik: Wiesen, Wege, Pflaster, Wasser, Bäume, Häuser und Figuren',
+  'Neue Klänge: Bäume krachen, Steine splittern, Grillen und Eulen in der Nacht, Winterwind',
+  'Uhr und Jahreszeit oben (antippen) · Tag/Nacht und Jahreszeiten in den Einstellungen',
+  'Leistungsautomatik: Ruckelt es auf einem langsamen Gerät, spart das Spiel von selbst an Zierde und Auflösung, bis es wieder flüssig läuft',
+  'Aus 4.3: sichtbare Logistik, Transport, Arbeiter · aus 4.2: Inseln, Wetter · aus 4.1: Forschung, Strom, Handel · aus 4.0: Tiefenmine, Ackerland',
+];
+const newsLi = () => NEWS.map(t => `<li>${t}</li>`).join('');
+// Nach einem Update einmal zeigen, was neu ist (nicht bei ganz neuen Spielern)
+function showNews(off) {
+  state = 'menu';
+  const earned = off && off.any;
+  showCard(`
+    <h2>Neu in Version ${VERSION}</h2>
+    <p class="small">Update installiert · dein Spielstand ist vollständig übernommen.</p>
+    ${earned ? `<div class="earn">${coinH}+${fmt(off.coins)}</div><p class="small">Während du ${dur(off.sec)} weg warst, haben Helfer und Maschinen weitergearbeitet.</p>` : ''}
+    <div class="news"><ul>${NEWS.slice(0, 3).map(t => `<li>${t}</li>`).join('')}</ul></div>
+    <button class="big" id="go">Weiter</button>
+    ${NEWS.length > 3 ? `<details class="news"><summary>Alles Neue ▾</summary><ul>${NEWS.slice(3).map(t => `<li>${t}</li>`).join('')}</ul></details>` : ''}`);
+  $('go').onclick = () => { SET.seenVer = VERSION; saveSet(); if (earned) { save(false); sfx('coinbig'); start(); popCoins(pl.x, pl.y - 60, off.coins); } else { sfx('ui'); start(); } };
+}
 const verTxt = () => `Version ${VERSION}${APP ? '<span class="appt">App</span>' : ''}`;
 function showMenu() {
   state = 'menu';
@@ -9352,15 +9378,7 @@ function showSettings(from) {
     <button class="big stick" id="back">${from === 'play' ? 'Weiter' : 'Zurück'}</button>
     ${xferHtml()}
     <details class="news"><summary>Neu in ${VERSION} ▾</summary><ul>
-      <li>4.4.1: Test-Update – dein Spielstand bleibt beim Aktualisieren vollständig erhalten</li>
-      <li>Tag und Nacht: Morgenrot, goldene Stunde, Nächte mit Laternen, Fensterlicht, Glühwürmchen und Leuchtturm</li>
-      <li>Jahreszeiten: Blüten im Frühling, buntes Laub im Herbst, Schnee im Winter, sanft spürbar beim Wachsen und Ernten</li>
-      <li>Bäume fallen um, Felsen zerspringen, Spuren in Sand und Schnee, Rauch aus den Schornsteinen, Wind in den Kronen</li>
-      <li>Natürlichere Grafik: Wiesen, Wege, Pflaster, Wasser, Bäume, Häuser und Figuren</li>
-      <li>Neue Klänge: Bäume krachen, Steine splittern, Grillen und Eulen in der Nacht, Winterwind</li>
-      <li>Uhr und Jahreszeit oben (antippen) · Tag/Nacht und Jahreszeiten in den Einstellungen</li>
-      <li>Leistungsautomatik: Ruckelt es auf einem langsamen Gerät, spart das Spiel von selbst an Zierde und Auflösung, bis es wieder flüssig läuft</li>
-      <li>Aus 4.3: sichtbare Logistik, Transport, Arbeiter · aus 4.2: Inseln, Wetter · aus 4.1: Forschung, Strom, Handel · aus 4.0: Tiefenmine, Ackerland</li>
+      ${newsLi()}
     </ul></details>
     <button class="danger" id="reset">${ISL ? 'Diese Insel neu beginnen' : 'Spielstand zurücksetzen'}</button>
     <p class="ver">${verTxt()}</p>`);
@@ -9425,7 +9443,9 @@ if (metaFix) saveMeta();
 if (!walkable(pl.x, pl.y, 10)) { pl.x = START.x; pl.y = START.y; }
 camX = pl.x; camY = pl.y;
 const off = S.started && S.lastSeen > 0 ? offlineCalc((Date.now() - S.lastSeen) / 1000) : null;
-if (off && off.any) { save(false); showWelcome(off); } else showMenu();
+const afterNews = () => { if (off && off.any) { save(false); showWelcome(off); } else showMenu(); };
+if (!S.started && !SET.seenVer) { SET.seenVer = VERSION; saveSet(); }   // ganz neue Spieler: kein Update-Fenster
+if (S.started && SET.seenVer !== VERSION) showNews(off); else afterNews();
 if (S.deep.at > 0 && S.done.schacht) setFloor(Math.min(S.deep.at, S.deep.max));
 requestAnimationFrame(loop);
 // App-Hülle: Bescheid geben, dass das Spiel bereit ist
