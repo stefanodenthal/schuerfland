@@ -217,7 +217,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5.1', SAVE_V = 4.4;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5.2', SAVE_V = 4.4;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -444,7 +444,7 @@ const PLATES = [
   { id: 'fischer',   x: 1545, y: 2690, req: 'schleif', cost: { balken: 60, bretter: 100, kupferbarren: 30 }, title: 'Fischerhütte bauen', done: 'Fische vom Steg · Helfer werden satt' },
   { id: 'krone',     x: 450,  y: -70,  req: 'fischer', cost: { juwel: 50, goldbarren: 65 }, title: 'Kristallkrone errichten', done: 'Alle Verkaufspreise +25 %' },
   { id: 'h_grotte',  x: 200,  y: 30,   req: 'schleif', opt: true, cost: { goldbarren: 20, juwel: 8, balken: 40 }, title: 'Kristallbohrer bauen', done: 'Bohrt Kristalle von allein' },
-  { id: 'tier3',     x: 450,  y: 3170, req: 'krone', pop: 12, deep: 20, cost: { brot: 160, fisch: 80, balken: 160, kupferbarren: 120, goldbarren: 60 }, title: 'Zur Kleinstadt werden', done: '+2 Helferplätze · Händler, Vorarbeiter, Räucherei' },
+  { id: 'tier3',     x: 450,  y: 3170, req: 'krone', pop: 12, deep: 10, cost: { brot: 160, fisch: 80, balken: 160, kupferbarren: 120, goldbarren: 60 }, title: 'Zur Kleinstadt werden', done: '+2 Helferplätze · Händler, Vorarbeiter, Räucherei' },
   { id: 'raeucherei',x: 1540, y: 2950, req: 'tier3', cost: { stein: 200, balken: 80, eisenbarren: 80 }, title: 'Räucherei bauen', done: 'Fisch und Holz werden zu Räucherfisch' },
   { id: 'haus4',     x: 830,  y: 3170, req: 'tier3', opt: true, cost: { balken: 80, stein: 150, kupferbarren: 30 }, title: 'Wohnhaus bauen', done: 'Platz für 2 weitere Helfer' },
   { id: 'steg',      x: 840,  y: 1745, req: 'raeucherei', cost: { balken: 325, eisenbarren: 240 }, title: 'Steg bauen', done: 'Die Sandbucht ist offen!' },
@@ -453,7 +453,7 @@ const PLATES = [
   { id: 'werkstatt', x: 110,  y: 2930, req: 'glas', cost: { glas: 415, balken: 240, eisenbarren: 240 }, title: 'Werkstatt bauen', done: 'Macht Fenster und Laternen' },
   { id: 'haus3',     x: 790,  y: 2932, req: 'werkstatt', opt: true, cost: { fenster: 60, balken: 120, laterne: 20 }, title: 'Wohnhaus bauen', done: 'Platz für 2 weitere Helfer' },
   { id: 'erfinder',  x: 450,  y: 3380, req: 'werkstatt', cost: { fenster: 80, laterne: 30, balken: 120, juwel: 20 }, title: 'Erfinderwerkstatt bauen', done: 'Bücher und Edelsteine werden zu Forschung' },
-  { id: 'tier4',     x: 450,  y: 3170, req: 'erfinder', pop: 18, deep: 40, cost: { raeucherfisch: 200, brot: 320, laterne: 80, silberbarren: 200, fenster: 160 }, title: 'Zur Stadt werden', done: '+2 Helferplätze · gepflasterte Stadt' },
+  { id: 'tier4',     x: 450,  y: 3170, req: 'erfinder', pop: 18, deep: 20, cost: { raeucherfisch: 200, brot: 320, laterne: 80, silberbarren: 200, fenster: 160 }, title: 'Zur Stadt werden', done: '+2 Helferplätze · gepflasterte Stadt' },
   { id: 'haus5',     x: 110,  y: 3170, req: 'tier4', opt: true, cost: { fenster: 60, balken: 150, silberbarren: 20 }, title: 'Wohnhaus bauen', done: 'Platz für 2 weitere Helfer' },
   { id: 'hafen',     x: 930,  y: 3420, req: 'tier4', cost: { balken: 200, bretter: 300, eisenbarren: 120 }, title: 'Hafensteg bauen', done: 'Handelsschiffe legen an' },
   { id: 'vulkan',    x: 1380, y: 1335, req: 'hafen', cost: { fenster: 275, kaktus: 275, schmuck: 75 }, title: 'Vulkanpass öffnen', done: 'Der Vulkan ist offen!' },
@@ -472,9 +472,9 @@ const PLATES = [
   { id: 'tele',      x: 200,  y: 3380, req: 'kraftwerk', tech: 'tele', opt: true, cost: { mithrilbarren: 30, juwel: 40, kristall: 60 }, title: 'Teleport-Kiste bauen', done: 'Voller Rucksack wandert ins Lager' },
   { id: 'schmiede',  x: 270,  y: 2930, req: 'kraftwerk', cost: { laterne: 185, juwel: 130, eisenbarren: 550 }, title: 'Glutschmiede bauen', done: 'Obsidian und Glut-Erz veredeln' },
   { id: 'h_vulkan',  x: 1170, y: 770,  req: 'schmiede', opt: true, cost: { laterne: 30, juwel: 20, eisenbarren: 100 }, title: 'Glutbohrer bauen', done: 'Bohrt Obsidian und Glut-Erz' },
-  { id: 'tier5',     x: 450,  y: 3170, req: 'schmiede', pop: 28, deep: 60, cost: { raeucherfisch: 280, mithrilbarren: 100, laterne: 150, balken: 400, brot: 300 }, title: 'Zur Hafenstadt werden', done: '+2 Helferplätze · Hafen und Leuchtfeuer' },
+  { id: 'tier5',     x: 450,  y: 3170, req: 'schmiede', pop: 28, deep: 30, cost: { raeucherfisch: 280, mithrilbarren: 100, laterne: 150, balken: 400, brot: 300 }, title: 'Zur Hafenstadt werden', done: '+2 Helferplätze · Hafen und Leuchtfeuer' },
   { id: 'stahlwerk', x: 450,  y: 2948, req: 'tier5', cost: { klinge: 95, glutbarren: 75, laterne: 185, balken: 550 }, title: 'Stahlwerk bauen', done: 'Macht Werkzeugstahl' },
-  { id: 'turm',      x: 1380, y: 560,  req: 'stahlwerk', deep: 80, power: 30, cost: { stahl: 180, laterne: 355, fenster: 535, mondholz: 65, mithrilbarren: 60, sternenerz: 60 }, title: 'Leuchtturm errichten', done: 'Schürfland ist vollendet!' },
+  { id: 'turm',      x: 1380, y: 560,  req: 'stahlwerk', deep: 40, power: 30, cost: { stahl: 180, laterne: 355, fenster: 535, mondholz: 65, mithrilbarren: 60, sternenerz: 60 }, title: 'Leuchtturm errichten', done: 'Schürfland ist vollendet!' },
   { id: 'expedition', x: 590, y: 3446, req: 'turm', cost: { balken: 400, stahl: 60, fenster: 120, laterne: 120, mithrilbarren: 40 }, title: 'Expeditionsschiff bauen', done: 'Neue Inseln warten!' },
 ];
 const PL = Object.fromEntries(PLATES.map(p => [p.id, p]));
@@ -9727,6 +9727,7 @@ function showPaused() {
   $('menu').onclick = showMenu;
 }
 const NEWS = [
+  '4.5.2: Dorfstufen brauchen nur noch halb so tiefe Tiefenmine: Kleinstadt Etage 10, Stadt 20, Hafenstadt 30, Leuchtturm 40',
   '4.5.1: Tiefenmine: Den Aufzug baust du jetzt schon ab Etage 5 (800 Münzen). Damit bohrt der Kupferbohrer viel früher. Kupfer liegt ab Etage 1 in orangen Adern',
   '4.5: Beim Verlassen pausiert das Spiel jetzt (umstellbar in den Einstellungen)',
   '4.5: Online-Rangliste in der App (🏆 im Menü): Spielername wählen, mitmachen, Plätze vergleichen. Dein Dorfname steht am Ortsschild und am Rathaus',
