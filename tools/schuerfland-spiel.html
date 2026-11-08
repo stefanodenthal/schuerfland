@@ -217,7 +217,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5', SAVE_V = 4.4;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '4.5.1', SAVE_V = 4.4;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -557,7 +557,7 @@ for (const k in BSEG) { const s = BSEG[k]; s.len = []; let L = 0; for (let i = 0
 const lineOf = id => { const out = []; let s = HARV[id].seg; while (s) { out.push(s); s = BSEG[s].to; } return out; };
 // Woher kommt ein Rohstoff? Für Hinweise
 const SRC = { holz: 'Bäumen', hartholz: 'Eichen', stein: 'Felsen', eisen: 'Eisenadern', gold: 'Goldadern', kristall: 'Kristallen in der Grotte', sand: 'Dünen in der Sandbucht', kaktus: 'Kakteen in der Sandbucht', bernstein: 'Bernstein in der Sandbucht', obsidian: 'Obsidian im Vulkan', gluterz: 'Glut-Erz im Vulkan', mondholz: 'Mondbäumen in der Grotte',
-  runenstein: 'Menhiren in der Felsenheide', eiskristall: 'Eisblumen in der Gletscherbucht', leuchtfrucht: 'Leuchtbäumen im Urwald', kupfer: 'Adern in der Tiefenmine', kohle: 'Kohleflözen ab Etage 3 der Tiefenmine', silber: 'Adern ab Etage 7 der Tiefenmine', mithril: 'Adern ab Etage 18 der Tiefenmine', sternenerz: 'Adern ab Etage 28 der Tiefenmine', weizen: 'Feldern im Ackerland', fisch: 'Fischgründen am Fischersteg' };
+  runenstein: 'Menhiren in der Felsenheide', eiskristall: 'Eisblumen in der Gletscherbucht', leuchtfrucht: 'Leuchtbäumen im Urwald', kupfer: 'orangen Adern ab Etage 1 der Tiefenmine', kohle: 'Kohleflözen ab Etage 3 der Tiefenmine', silber: 'Adern ab Etage 7 der Tiefenmine', mithril: 'Adern ab Etage 18 der Tiefenmine', sternenerz: 'Adern ab Etage 28 der Tiefenmine', weizen: 'Feldern im Ackerland', fisch: 'Fischgründen am Fischersteg' };
 const listDe = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1] : a[0] || '';
 function srcHint(k) { if (RAWOF[k]) { const o = RAWOF[k]; return RES[k].name + ' (' + BLD[o.b].name + ': ' + Object.keys(o.rec.in).map(r => RES[r].name).join(' + ') + ')'; } return RES[k].name + (SRC[k] ? ' an ' + SRC[k] : ''); }
 let plateHintT = -9;
@@ -662,7 +662,7 @@ const DRILL = {
   d: { name: 'Sternenbohrer', at: 35, make: { sternenerz: 0.03 }, cost: 40000 },
 };
 const LIFTR = [0, 1, 2.5, 6, 12], LIFTBUF = [0, 80, 200, 500, 1200], LIFTCOST = [0, 0, 3000, 9000, 25000];
-const PUMPCOST = 350, LAMPCOST = 800, LAMPLAT = 25;
+const PUMPCOST = 350, LAMPCOST = 800, LAMPLAT = 25, LIFT1COST = 800, LIFT1AT = 5;
 const COLL = [
   ['ammonit', 'Ammonit', 'f'], ['trilobit', 'Trilobit', 'f'], ['farn', 'Farnabdruck', 'f'], ['zahn', 'Urzeitzahn', 'f'], ['schnecke', 'Steinschnecke', 'f'], ['fischfo', 'Urfisch', 'f'], ['feder', 'Federabdruck', 'f'], ['schaedel', 'Höhlenbär-Schädel', 'f'],
   ['rubin', 'Rubin', 'g', '#e2384f'], ['saphir', 'Saphir', 'g', '#3a6fe0'], ['smaragd', 'Smaragd', 'g', '#2fbf6a'], ['amethyst', 'Amethyst', 'g', '#a35ce0'], ['topas', 'Topas', 'g', '#ffb53a'], ['opal', 'Opal', 'g', '#bfeff0'], ['mondstein', 'Mondstein', 'g', '#e8f0ff'], ['sternsaphir', 'Sternsaphir', 'g', '#5a4fe0'],
@@ -4661,7 +4661,7 @@ function cpCheck(F) {
   const c = cpCost(F.f), pd = S.deep.cpPaid;
   if (Object.keys(c.cost).every(k => (pd[k] || 0) >= c.cost[k]) && S.deep.cpBlast >= c.blasts) {
     S.deep.cp = Math.max(S.deep.cp, F.f); S.deep.cpPaid = {}; S.deep.cpBlast = 0; F.cleared = true; setTimeout(() => rangSubmit('tiefe'), 50);
-    if (F.f === 10) S.deep.lift = Math.max(1, S.deep.lift);
+    if (F.f === 10) { if (S.deep.lift) { S.coins += LIFT1COST; toast('Aufzug-Kosten zurück: +' + LIFT1COST + ' Münzen', 2600); } S.deep.lift = Math.max(1, S.deep.lift); }
     multC = null;
     banner = { a: 'Herausforderung geschafft!', b: cpRewardTxt(F.f), life: 3.6, age: 0 };
     burst(F.shaft.x, F.shaft.y - 30, '#ffd34d', 40, 240); sfx('fanfare'); vib([30, 40, 60]);
@@ -8931,15 +8931,16 @@ function deepHtml() {
   h += F ? '<button class="pill" data-act="dgo" data-v="0" data-free="1">⬆ Nach oben</button>' : '<button class="pill" data-act="dgo" data-v="1" data-free="1">⬇ Einsteigen · Etage 1</button>';
   if (D.lift && (!F || F.f % 10 === 0)) for (let f = 10; f <= D.max; f += 10) if (!F || F.f !== f) h += `<button class="pill" data-act="dgo" data-v="${f}" data-free="1">Aufzug · Etage ${f}</button>`;
   h += '</div>';
-  if (!D.lift) h += '<small class="note">Der Aufzug kommt mit der Höhlen-Herausforderung auf Etage 10.</small>';
+  if (!D.lift) h += '<small class="note">Den Aufzug baust du ab Etage ' + LIFT1AT + ' unten im Ausbau. Bei der Herausforderung auf Etage 10 gibt es die Kosten zurück.</small>';
   else if (F && F.f % 10) h += '<small class="note">Der Aufzug hält nur auf Etage 10, 20, 30 …</small>';
   h += `<small class="note">Erze wandern über den Förderkorb oben auf jeder Etage direkt ins Lager. Herausforderungen geschafft: ${D.cp / 10}</small>`;
   h += '<div class="sec">Ausbau</div>';
   h += row('Pumpe', D.pump ? 'Legt geflutete Schächte trocken' : 'Für Etagen mit Wasser im Schacht', D.pump ? null : PUMPCOST, 'dpump', '');
   if (D.max >= 18 || D.lamp) h += row('Laternenkette', D.lamp ? 'Dunkle Etagen sind hell' : 'Für dunkle Etagen ab 21 · nimmt ' + LAMPLAT + ' Laternen aus dem Lager (hast ' + fmt(lhas('laterne')) + ')', D.lamp ? null : LAMPCOST, 'dlamp', '', !D.lamp && lhas('laterne') < LAMPLAT);
+  if (!D.lift) h += row('Aufzug bauen', D.max < LIFT1AT ? 'Ab Etage ' + LIFT1AT : 'Bringt das Erz der Bohrer ins Lager · ' + fmt(LIFTR[1] * 60) + ' pro Minute', LIFT1COST, 'dlift', '', D.max < LIFT1AT);
   if (D.lift) { const c = LIFTCOST[D.lift + 1]; h += row('Aufzug ' + D.lift + '/' + (LIFTR.length - 1), 'Bringt ' + fmt(LIFTR[D.lift] * 60) + ' Erz pro Minute hoch · Puffer ' + deepBufN() + '/' + LIFTBUF[D.lift], c === undefined ? null : c, 'dlift', ''); }
   for (const id in DRILL) {
-    const d = DRILL[id], lv = D.dr[id], c = drillCost(id), lock = D.max < d.at ? 'Ab Etage ' + d.at : !D.lift ? 'Braucht den Aufzug' : '';
+    const d = DRILL[id], lv = D.dr[id], c = drillCost(id), lock = D.max < d.at ? 'Ab Etage ' + d.at : !D.lift ? 'Braucht den Aufzug (ab Etage ' + LIFT1AT + ' baubar)' : '';
     h += row(d.name + (lv ? ' ' + lv + '/' + HSPD.length : ''), lock || Object.keys(d.make).map(r => fmt(d.make[r] * HSPD[Math.max(0, lv - 1)] * 60) + ' ' + RES[r].name).join(' + ') + ' pro Minute' + (lv ? '' : ' · bohrt von allein'), c, 'ddrill', id, !!lock);
   }
   h += `<div class="sec">Sammlung ${collN()}/${COLL.length}</div><small class="note">Fossilien und Edelsteine aus Kisten. Jeder Fund: alle Preise +1 %. Alle Fossilien: Abbau +10 %, alle Edelsteine: Preise +10 %.</small><div class="coll">`;
@@ -9192,7 +9193,7 @@ function doAct(act, k, i, v) {
   }
   else if (act === 'dlamp') { if (S.deep.lamp || S.coins < LAMPCOST || lhas('laterne') < LAMPLAT) return false; S.coins -= LAMPCOST; ltake('laterne', LAMPLAT); statU('laterne', LAMPLAT); S.deep.lamp = 1; if (deep && deep.obs.type === 'dunkel') deep.cleared = true; fx('Laternenkette hängt!'); }
   else if (act === 'dpump') { if (S.deep.pump || S.coins < PUMPCOST) return false; S.coins -= PUMPCOST; S.deep.pump = 1; fx('Pumpe gekauft!'); }
-  else if (act === 'dlift') { const c = LIFTCOST[S.deep.lift + 1]; if (!S.deep.lift || c === undefined || S.coins < c) return false; S.coins -= c; S.deep.lift++; fx('Aufzug Stufe ' + S.deep.lift + '!'); }
+  else if (act === 'dlift') { if (!S.deep.lift) { if (S.deep.max < LIFT1AT || S.coins < LIFT1COST) return false; S.coins -= LIFT1COST; S.deep.lift = 1; fx('Aufzug gebaut!'); } else { const c = LIFTCOST[S.deep.lift + 1]; if (c === undefined || S.coins < c) return false; S.coins -= c; S.deep.lift++; fx('Aufzug Stufe ' + S.deep.lift + '!'); } }
   else if (act === 'ddrill') { const d = DRILL[k], c = d && drillCost(k); if (!d || c === null || S.coins < c || S.deep.max < d.at || !S.deep.lift) return false; S.coins -= c; S.deep.dr[k]++; fx(d.name + (S.deep.dr[k] > 1 ? ' schneller!' : ' bohrt!')); }
   else if (act === 'tsell') { const cfg = S.helpers[i]; if (!cfg) return false; cfg.sell = nextOf(TSELL, cfg.sell); }
   else if (act === 'swap') {
@@ -9726,6 +9727,7 @@ function showPaused() {
   $('menu').onclick = showMenu;
 }
 const NEWS = [
+  '4.5.1: Tiefenmine: Den Aufzug baust du jetzt schon ab Etage 5 (800 Münzen). Damit bohrt der Kupferbohrer viel früher. Kupfer liegt ab Etage 1 in orangen Adern',
   '4.5: Beim Verlassen pausiert das Spiel jetzt (umstellbar in den Einstellungen)',
   '4.5: Online-Rangliste in der App (🏆 im Menü): Spielername wählen, mitmachen, Plätze vergleichen. Dein Dorfname steht am Ortsschild und am Rathaus',
   '4.5: Bäume wachsen langsamer nach, Holz will eingeteilt sein. Neu: der Förster pflanzt gefällte Bäume neu, die Gießkanne hat eine 4. Stufe',
