@@ -249,7 +249,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.0', SAVE_V = 5.0;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.0.1', SAVE_V = 5.0;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -961,7 +961,7 @@ const int = (v, a, b, d) => { const n = Math.floor(Number(v)); return Number.isF
 // 5.0: S.m50 hält fest, was die Migration erstattet hat (für die Umbau-Karte, Paket C). from = alte Version (null: neuer Spielstand)
 const M50_0 = from => ({ from, coins: 0, mp: 0, items: [], helpers: [] });
 const DEEP0 = () => ({ max: 0, cp: 0, at: 0, pump: 0, lamp: 0, lift: 0, dr: {}, buf: {}, coll: {}, cpPaid: {}, cpBlast: 0 });
-let S = { v: SAVE_V, coins: 0, up: { axe: 1, pick: 1, bag: 1, boots: 1 }, sp: {}, done: {}, paid: {}, stack: [], x: START.x, y: START.y, started: false, helpers: null, bld: {}, harv: {}, lager: { it: {}, lv: 1 }, kran: { sell: true }, quests: [], lastSeen: 0, stats: { quests: 0 }, deep: DEEP0(), smith: 0, hid: 0, keepX: {}, tech: {}, pw: { burn: 0 }, dro: { n: 0 }, mkt: { m: {}, h: {}, ev: null, evT: 200, hT: 0, min: 0 }, trade: { left: 60, ship: null, bp: {}, n: 0 }, auto: {}, wx: { k: null, t: 0, next: 300 }, ops: [], trans: 0, tut: 0,
+let S = { v: SAVE_V, coins: 0, up: { axe: 1, pick: 1, bag: 1, boots: 1 }, sp: {}, done: {}, paid: {}, stack: [], x: START.x, y: START.y, started: false, helpers: null, bld: {}, harv: {}, lager: { it: {}, lv: 1 }, kran: { sell: true, build: false }, quests: [], lastSeen: 0, stats: { quests: 0 }, deep: DEEP0(), smith: 0, hid: 0, keepX: {}, tech: {}, pw: { burn: 0 }, dro: { n: 0 }, mkt: { m: {}, h: {}, ev: null, evT: 200, hT: 0, min: 0 }, trade: { left: 60, ship: null, bp: {}, n: 0 }, auto: {}, wx: { k: null, t: 0, next: 300 }, ops: [], trans: 0, tut: 0,
   // 5.0: neue Felder (Abschnitt 3.1, 6.1, 6.2, 7.1, 8, 14). m50.from = null: neuer Spielstand (keine Migration)
   berg: BERG0(), daily: DAILY0(), ftue: FTUE0(), zuf: ZUF0(), doneOld: {}, m50: M50_0(null) };
 let loadInfo = { from: 'neu', oldV: null };
@@ -1146,7 +1146,7 @@ function migrate50(ov) {
     for (const k of Object.keys(obj(h.buf))) if (RES[k]) { const v = Math.max(0, Math.floor(Number(h.buf[k]) || 0)); if (v) buf[k] = v; }
     S.harv[id] = { buf, lv: int(h.lv, 1, HSPD.length, hlvOf45(h)), acc: {} };   // 5.0: eine Stufe statt spd und belt
   }
-  S.kran = { ...obj(S.kran), sell: obj(S.kran).sell !== false };
+  S.kran = { ...obj(S.kran), sell: obj(S.kran).sell !== false, build: obj(S.kran).build === true };
   // Zu viele Helfer für die Hütte? Dann stehen die Häuser schon
   if (old) { const need = Math.min(3, Math.ceil(Math.max(0, S.helpers.length - 3) / 2)); for (let i = 0; i < need; i++) S.done[HOUSES[i]] = true; }
   S.quests = S.quests.filter(q => q && RES[q.res] && q.n > 0).map(q => ({ res: q.res, n: Math.floor(q.n), got: clamp(Math.floor(q.got) || 0, 0, q.n), reward: Math.max(5, Math.floor(q.reward) || 10) })).slice(0, 3);
@@ -3972,6 +3972,8 @@ function actEco(act, k, i, v) {
     if (!v) return false; statC(v); popCoins(pl.x, pl.y - 60, v); sfx('coinbig');
   }
   else if (act === 'ksell') S.kran.sell = !S.kran.sell;
+  else if (act === 'kbuild') S.kran.build = !S.kran.build;
+  else if (act === 'pack') { if (!S.done.lager || !onPadAt(LPAD) || !packGoal()) return false; packReq = true; packOff = false; }
   else if (act === 'spende') { const c = spendeCost(); if (!logOn() || S.coins < c) return false; S.coins -= c; META.don = (META.don || 0) + 1; META.mp += 1; META.mpAll += 1; saveMeta(); fx('+1 ⭐ von der Gilde!'); }
   else if (act === 'schmuck') { const lv = S.schmuck || 0, nx = SCHMUCK[lv]; if (!nx || tierNow() < nx.tier || S.coins < nx.cost) return false; S.coins -= nx.cost; S.schmuck = lv + 1; flushChunks(); fx(nx.name + ' im Dorf!'); banner = { a: nx.name + '!', b: 'Das Dorf wird schöner: +1 Einwohner, Helfer +2 % schneller', life: 3, age: 0 }; }
   else if (act === 'mrec') { if (!BLD[k]) return false; const n = Number(v); if (v !== 'auto' && v !== 'pause' && !(Number.isInteger(n) && BLD[k].rec[n])) return false; bst(k).rec = v === 'auto' || v === 'pause' ? v : n; }
@@ -4177,7 +4179,7 @@ function goalRaw() {
     const room = cap() - S.stack.filter(r => need[r]).length;   // was das Ziel nicht braucht, legt die Rampe ab
     if (fromL.length && room > 0 && !(full && carry)) {
       let left = room; const txt = fromL.slice(0, 2).map(k => { const n = Math.max(0, Math.min(need[k] - cnt(S.stack, k), lhas(k), left)); left -= n; return n ? fmt(n) + ' ' + RES[k].name : ''; }).filter(Boolean).join(', ');
-      return { ...out(tx('goal.hol', 'Hol') + ' ' + txt + ' ' + tx('goal.ausl', 'aus dem Lager'), LPAD), key: key + '|hol' };
+      return { ...out(tx('goal.hol', 'Hol') + ' ' + txt + ' ' + tx('goal.ausl', 'aus dem Lager') + ' · ' + tx('goal.holbtn', 'dort „🎒 Holen“'), LPAD), key: key + '|hol' };
     }
     if (nb.length && !carry) return out(tx('goal.soon', 'Gleich im Lager · dann holen und hintragen'), LPAD);
     return out(tx('goal.put1', 'Alles da · auf den Bauplatz stellen'), g);
@@ -4370,9 +4372,10 @@ function nearestBench() { let best = BENCHES[0], bd = 1e9; for (const b of BENCH
 // Bauplätze nehmen nur Gebrachtes: Rucksack des Spielers, Helfer und Träger (Regel „Baustellen“) und den Kran in seiner Reichweite.
 // An der Lager-Rampe legt der Spieler ab, was nicht gebraucht wird, und packt ein, was dem Ziel fehlt und im Lager liegt.
 const kranReach = () => S.tech.smart ? KRAN_R2 : KRAN_R;
-const kranCovers = p => !!(p && S.done.kran && S.done.lager && Math.hypot(p.x - KRAN_P.x, p.y - KRAN_P.y) <= kranReach());
-let packFor = null, packForT = -99, packN = {}, packG = null, packOff = false, kranRingT = -99, kranSeen = false;
-const PACK_HOLD = 180;   // so lange gilt ein besuchter Bauplatz als gewollt: die Rampe packt dann dafür ein (sonst fürs Hauptziel)
+const kranCovers = p => !!(p && S.done.kran && S.kran.build && S.done.lager && Math.hypot(p.x - KRAN_P.x, p.y - KRAN_P.y) <= kranReach());
+let packReq = false, packHeld = false, packFor = null, packForT = -99, packN = {}, packG = null, packOff = false, kranRingT = -99, kranSeen = false;
+const PACK_HOLD = 180;
+const packKey = () => { const pg = S.done.lager ? packGoal() : null; return pg ? pg.id + JSON.stringify(carryNeed(pg)) + cap() + S.stack.length + onPadAt(LPAD) : '-'; };   // so lange gilt ein besuchter Bauplatz als gewollt: die Rampe packt dann dafür ein (sonst fürs Hauptziel)
 function onWayTo(p, r) { let n = 0; for (const h of helpers) if (h.dest && h.dest.plate === p.id) n += cnt(h.load, r); return n; }
 // Was zu Bauplatz p noch getragen werden muss: { ware: Stück } ohne das, was Helfer schon hintragen (null: nichts)
 function carryNeed(p) {
@@ -4568,11 +4571,11 @@ function update(dt) {
   // Lager-Rampe (§17): erst ablegen, was das Ziel nicht braucht, dann einpacken, was ihm fehlt und im Lager liegt
   if (S.done.lager && onPadAt(LPAD)) {
     if (S.tut < 3) packOff = true;   // Erste Schritte, Schritt 3: dieser Besuch lagert nur ein (packt erst beim nächsten Mal)
-    const pg = packOff ? null : packGoal(), want = pg ? carryNeed(pg) : null;
+    const pg = packOff || !packReq ? null : packGoal(), want = pg ? carryNeed(pg) : null;
     lagT -= dt; let noDrop = false;
     while (lagT <= 0) {
       lagT += 0.022;
-      let idx = -1; if (!noDrop) for (let i = S.stack.length - 1; i >= 0; i--) { const r = S.stack[i]; if (!want || !want[r] || cnt(S.stack, r) > want[r]) { idx = i; break; } }
+      let idx = -1; if (!noDrop && !packHeld) for (let i = S.stack.length - 1; i >= 0; i--) { const r = S.stack[i]; if (!want || !want[r] || cnt(S.stack, r) > want[r]) { idx = i; break; } }
       if (idx >= 0) {
         const r = S.stack[idx];
         if (ladd(r, 1)) { S.stack.splice(idx, 1); fly(pl.x, pl.y - 30, LAGER.x + 40 + rnd(-14, 14), LAGER.y - 30, r); lagN++; lagLastT = T; sfx('store', { pitch: 0.9 + Math.random() * 0.25 }); continue; }
@@ -4580,11 +4583,11 @@ function update(dt) {
         noDrop = true;   // Lager voll: trotzdem einpacken, was das Ziel braucht (macht Platz)
       }
       const r = want && S.stack.length < cap() ? Object.keys(want).find(k => cnt(S.stack, k) < want[k] && packAvail(pg, k) > 0) : null;
-      if (!r) { lagDone(); break; }
+      if (!r) { lagDone(); if (packReq) packHeld = true; packReq = false; break; }
       ltake(r, 1); S.stack.push(r); fly(LAGER.x + 40 + rnd(-14, 14), LAGER.y - 30, undefined, undefined, r); packN[r] = (packN[r] || 0) + 1; packG = pg; lagLastT = T;
       sfx('store', { pitch: 1.15 + Math.random() * 0.25 });
     }
-  } else { lagT = 0; lagDone(); packOff = false; }
+  } else { lagT = 0; lagDone(); packOff = false; packReq = false; packHeld = false; }
   // Sammler mit Band: Rucksack aufs Band legen
   let onH = false;
   for (const id of harvIds()) {
@@ -10508,6 +10511,13 @@ function boardHtml() {
 function lagerHtml() {
   const lt = lagerTotal(), c = LCOST[S.lager.lv - 1];
   let h = head(tx('tab.lager', 'Lager'), fmt(lt) + '/' + fmt(lcap())) + tabs();
+  { const pg = packGoal(), need = pg ? carryNeed(pg) : null;
+    if (need) {
+      const onR = onPadAt(LPAD); let left = cap() - (onR ? 0 : S.stack.length);
+      const parts = Object.keys(need).map(k => { const n = Math.max(0, Math.min(need[k] - cnt(S.stack, k), lhas(k), left)); left -= n; return n ? fmt(n) + ' ' + RES[k].name : ''; }).filter(Boolean);
+      if (parts.length) h += `<div class="up"><div><strong>🎒 ${tx('pack.for', 'Für')} ${shortTitle(pg)} ${tx('pack.hol', 'holen')}</strong><small>${parts.join(', ')}${onR ? '' : ' · ' + tx('pack.ramp', 'an der Rampe am Lager')}</small></div><button class="buy" data-act="pack" data-free="1"${onR ? '' : ' disabled'}>${tx('pack.go', 'Holen')}</button></div>`;
+    }
+  }
   h += row(tx('lag.up', 'Lager ausbauen'), tx('lag.lv', 'Stufe') + ' ' + S.lager.lv + ' · ' + tx('lag.cap', 'Platz für') + ' ' + fmt(lcap()) + (c !== undefined ? ' → ' + fmt(LCAP[S.lager.lv]) : ''), c === undefined ? null : c, 'lup', '');
   const items = Object.keys(S.lager.it).sort((a, b) => (keepN[b] || 0) - (keepN[a] || 0) || RES[b].price * S.lager.it[b] - RES[a].price * S.lager.it[a]);
   if (!items.length) return h + '<small class="note">' + tx('lag.empty', 'Leer. Stell dich im Dorf auf die Rampe am Lager: dein Rucksack wandert hinein.') + '</small>';
@@ -10517,7 +10527,8 @@ function lagerHtml() {
   h += '<div class="grid">';
   for (const r of items) { const n = S.lager.it[r], sp = surplus(r), kp = keepN[r] || 0; h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(n)}${kp ? ' · ' + tx('lag.goal', 'fürs Ziel') + ' ' + fmt(Math.min(kp, n)) : ''}</span>${sp ? `<button class="buy" data-act="sell" data-k="${r}" data-free="1" aria-label="${RES[r].name} verkaufen">+${fmt(sellValue(r, sp))}</button>` : ''}</div>`; }
   h += '</div>';
-  if (S.done.kran) h += `<small class="note">🏗 ${tx('lag.kranr', 'Der Kran beliefert Bauplätze im Dorf (gestrichelter Kreis am Boden); weiter weg tragen Träger oder du')}</small>`;
+  if (S.done.kran) h += `<small class="note">🏗 ${tx('lag.kranr', 'Eingeschaltet beliefert der Kran Bauplätze im Dorf (gestrichelter Kreis am Boden); sonst und weiter weg tragen Träger oder du')}</small>`;
+  if (S.done.kran) h += `<div class="opt"><span>${tx('lag.kranb', 'Kran beliefert Baustellen im Dorf')}</span><button class="tog${S.kran.build ? '' : ' off'}" data-act="kbuild">${S.kran.build ? 'An' : 'Aus'}</button></div>`;
   if (S.done.kran) h += `<div class="opt"><span>${tx('lag.kran', 'Kran verkauft bei vollem Lager')}</span><button class="tog${S.kran.sell ? '' : ' off'}" data-act="ksell">${S.kran.sell ? 'An' : 'Aus'}</button></div>`;
   return h;
 }
@@ -10801,6 +10812,8 @@ function proxMode() {
   if (S.done.expedition && onPadAt(XPAD, 30, 22)) { if (!xlogOn) xlogOn = T; if (T - xlogOn > 0.45) return 'xlog'; } else xlogOn = 0;
   if (S.done.hafen && onPadAt(PIERPAD, 30, 26)) return 'hafen';
   { const sp = SPADS(); if (S.done.kraftwerk && onPadAt(sp.kraftwerk)) return 'strom'; if (S.done.drohnen && onPadAt(sp.drohnen)) return 'drohnen'; }
+  // 5.0.1: Die Lager-Rampe öffnet nach dem Einlagern das Lager-Menü (dort „🎒 Holen“ fürs Ziel)
+  if (S.done.lager && S.tut >= 3 && onPadAt(LPAD) && !S.stack.length && T - lagLastT > 0.6) return 'ramp';
   // Die Werkbank im Dorf öffnet das Dorf-Menü im Tab „Werkbank“ (5.3)
   const b = BENCHES.find(b => stOpen(b) && Math.abs(pl.x - b.x) < 46 && Math.abs(pl.y - b.y) < 46 && dist(pl, b) < 44);
   if (b) return 'bank:' + b.reg;
@@ -10812,6 +10825,7 @@ function proxMode() {
 function sheetHtml(mode) {
   if (mode === 'board') return boardHtml();
   if (mode === 'hub') return hubHtml();
+  if (mode === 'ramp') { hubTab = 'lager'; return lagerHtml(); }
   if (mode === 'hafen') return hafenHtml();
   if (mode === 'xlog') return logHtml(false);
   if (mode === 'strom') return stromHtml();
@@ -10823,6 +10837,7 @@ function sheetHtml(mode) {
 }
 const bankKey = () => JSON.stringify(S.up) + JSON.stringify(S.sp) + S.helpers.length + helperCap() + Object.keys(S.done).length + S.trans + S.tut + Object.keys(HTOOL).map(j => hireToolOkQuiet(j) ? 1 : 0).join('') + ['w_axt', 'w_hacke', 'w_sense', 'w_angel'].map(lhas).join();
 function sheetKeyOf(mode) {
+  if (mode === 'ramp') return 'ramp' + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + '|' + S.kran.build + '|' + packKey() + S.done.kran + S.done.tier2;
   const live = Math.floor(T / 2);
   if (mode === 'board') return JSON.stringify(S.daily) + chestPick + orderMul('daily') + (chestPick ? S.helpers.map(c => c.lv).join() + live : '') + (S.done.hafen ? JSON.stringify(S.trade.ship) + live : '');
   if (mode === 'xlog') return logKey();
@@ -10832,7 +10847,7 @@ function sheetKeyOf(mode) {
     if (t === 'helfer') return t + JSON.stringify(S.helpers.map(h => [h.type, h.work, h.res, h.keep, h.sell, h.at, h.lv, h.fed > 0, h.build, h.to, h.wauto])) + helperCap() + jobPick + JSON.stringify(pickOpen) + moreOpen + opsOpen + Math.floor(S.smith / 50) + S.trans + S.ops.length + bergAreas().length + live;
     if (t === 'dorf') return t + tierNow() + '|' + popNow() + '|' + (S.schmuck || 0) + '|' + JSON.stringify(S.paid) + FOODS.map(lhas).join() + sohleNow() + (S.zuf ? Math.round(Number(S.zuf.v) || 0) + '|' + S.zuf.tax : '') + JSON.stringify(S.auto) + live;
     if (t === 'mehr') { const m = mehrSub; return t + m + (m === 'rang' ? rangKey() : m === 'log' ? logKey() : m === 'tech' ? JSON.stringify(S.tech) + lhas('fp') + S.done.erfinder : m === 'sammel' ? JSON.stringify(S.deep.coll) : m === 'drohnen' ? S.dro.n + '|' + (S.coins >= 1500 * (S.dro.n + 1)) + live : live + (m === 'markt' ? S.mkt.min + JSON.stringify(S.trade.bp) : '')); }
-    return t + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + S.done.kran + S.done.tier2 + (S.coins >= (LCOST[S.lager.lv - 1] || 1e12));
+    return t + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + '|' + S.kran.build + '|' + packKey() + S.done.kran + S.done.tier2 + (S.coins >= (LCOST[S.lager.lv - 1] || 1e12));
   }
   if (mode === 'hafen') return JSON.stringify(S.trade.ship) + Math.floor(S.trade.left) + live;
   if (mode === 'strom') return pwDem + '|' + Math.round(pwProd) + live;
@@ -11465,6 +11480,7 @@ function showPaused() {
   $('menu').onclick = showMenu;
 }
 const NEWS = [
+  '5.0.1: Lager-Rampe lagert wieder alles ein und öffnet das Lager-Menü. Material fürs Ziel holst du dort mit „🎒 Holen“, nichts landet mehr ungefragt im Rucksack. Der Kran beliefert Baustellen nur noch, wenn du es im Lager-Menü einschaltest',
   tx('news.50a', '5.0: Ein Bergwerk statt Mine, Tiefenmine und Grotte: 7 feste Sohlen mit eigenem Erz, Bohrern und Förderturm. Die Kristallgrotte ist jetzt Sohle 4, Bergarbeiter können unten arbeiten'),
   tx('news.50b', '5.0: Eine Werkbank und ein Marktstand im Dorf. Alle Werkzeuge gibt es dort, auch von überall über ☰ → Werkbank'),
   tx('news.50c', '5.0: Tagesaufträge ab Dorf: jeden Tag drei, jeder bringt einen Stempel. 7 Stempel öffnen eine Truhe'),
