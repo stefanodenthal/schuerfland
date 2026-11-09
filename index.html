@@ -330,7 +330,7 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
 </div>
 
 <script>
-window.SFL_APP = { version: "5.1.1-dd0da8dd", standalone: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true };
+window.SFL_APP = { version: "5.1.2-c81c64d0", standalone: (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true };
 </script>
 <script>
 (() => {
@@ -341,7 +341,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), rangEl = $('rangBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.1.1', SAVE_V = 5.0;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.1.2', SAVE_V = 5.0;
 const toastEl = $('toast');
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
 const APP = (() => { try { const a = window.SFL_APP; return a && typeof a === 'object' ? a : null; } catch (e) { return null; } })();
@@ -902,6 +902,10 @@ Object.assign(EN, {
   'ctl.drag': 'Drag', 'ctl.click': 'Click',
   // 5.1.1 (H511): Rangliste schneller erreichbar
   'news.511a': '5.1.1: 🏆 Leaderboard now right at the top of the screen, next to the gear. If you take part, it shows your place',
+  // 5.1.2 (H512): Schärfe
+  'card.s.sharp': 'Sharpness', 'card.s.sh.auto': 'Automatic', 'card.s.sh.max': 'Always sharp',
+  'card.s.sh.na': 'Lowers detail briefly only if the game stutters', 'card.s.sh.nm': 'Never lowers resolution, uses more battery',
+  'news.512a': '5.1.2: Sharper picture on phones. New in Settings: “Sharpness” (Automatic or Always sharp)',
 });
 // ---------- (Ende EN: Paket D) ----------
 // 5.1 (P0): Texte im statischen HTML (oben, ohne tx) einmal setzen. Inhalt: Paket C (Schlüssel ui.html.*)
@@ -1020,19 +1024,21 @@ function rgba(h, a) { const c = rgbOf(h); return 'rgba(' + c[0] + ',' + c[1] + '
 
 // ---------- Einstellungen ----------
 // 5.1: SET.lang ('de'|'en') nur, wenn der Spieler die Sprache selbst gewählt hat (sonst fehlt es: Sprache des Geräts)
-let SET = { sound: true, vib: true, gfx: 'hoch', sfx: 0.8, amb: 0.6, mus: 0.35, wetter: true, calm: false, tagnacht: true, jahr: true, seasonDays: 2, leave: 'pause', pname: '', dorf: '' };
+let SET = { sound: true, vib: true, gfx: 'hoch', sfx: 0.8, amb: 0.6, mus: 0.35, wetter: true, calm: false, tagnacht: true, jahr: true, seasonDays: 2, leave: 'pause', pname: '', dorf: '', sharp: 'auto' };
 // 4.5: Spielername (2–16 Zeichen) und Dorfname (2–20): Buchstaben (auch ÄÖÜäöüß), Ziffern, Leerzeichen, Punkt, Unterstrich, Bindestrich
 const NAME_RE = /^[A-Za-z0-9ÄÖÜäöüß ._-]+$/;
 const cleanName = (v, max) => { const t = String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); return t.length >= 2 && t.length <= max && NAME_RE.test(t) ? t : ''; };
 const vol01 = (v, d) => { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : d; };
-try { const r = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (r && typeof r === 'object') SET = { ...r, sound: r.sound !== false, vib: r.vib !== false, gfx: r.gfx === 'niedrig' ? 'niedrig' : 'hoch', sfx: vol01(r.sfx, 0.8), amb: vol01(r.amb, 0.6), mus: vol01(r.mus, 0.35), wetter: r.wetter !== false, calm: r.calm === true, tagnacht: r.tagnacht !== false, jahr: r.jahr !== false, seasonDays: [1, 2, 4].includes(Number(r.seasonDays)) ? Number(r.seasonDays) : 2, leave: r.leave === 'weiter' ? 'weiter' : 'pause', pname: cleanName(r.pname, 16), dorf: cleanName(r.dorf, 20), rangAsk: r.rangAsk === true }; if (!LANG_OK(SET.lang)) delete SET.lang; } catch (e) {}
+try { const r = JSON.parse(localStorage.getItem(SKEY) || 'null'); if (r && typeof r === 'object') SET = { ...r, sound: r.sound !== false, vib: r.vib !== false, gfx: r.gfx === 'niedrig' ? 'niedrig' : 'hoch', sfx: vol01(r.sfx, 0.8), amb: vol01(r.amb, 0.6), mus: vol01(r.mus, 0.35), wetter: r.wetter !== false, calm: r.calm === true, tagnacht: r.tagnacht !== false, jahr: r.jahr !== false, seasonDays: [1, 2, 4].includes(Number(r.seasonDays)) ? Number(r.seasonDays) : 2, leave: r.leave === 'weiter' ? 'weiter' : 'pause', sharp: r.sharp === 'immer' ? 'immer' : 'auto', pname: cleanName(r.pname, 16), dorf: cleanName(r.dorf, 20), rangAsk: r.rangAsk === true }; if (!LANG_OK(SET.lang)) delete SET.lang; } catch (e) {}
 function saveSet() { try { localStorage.setItem(SKEY, JSON.stringify(SET)); } catch (e) {} }
 const LOW = () => SET.gfx === 'niedrig';
 // 4.5: Beim Verlassen pausiert das Spiel (Standard). „Weiterarbeiten“ ist der alte Offline-Verdienst (höchstens 2 Std).
 const PAUSE = () => SET.leave !== 'weiter';
 // 4.4 Leistungsautomatik: läuft das Spiel auf einem langsamen Gerät länger ruckelig, wird teure Zierde vorübergehend ausgedünnt
 // (LITE 1) und, wenn das nicht reicht, die Leinwand mit geringerer Auflösung gezeichnet (LITE 2 und 3, RS = Auflösungsfaktor)
-let LITE = 0, RS = 1;
+// 5.1.2: Schärfe „Immer scharf“ (SET.sharp = 'immer'): nie geringere Auflösung, auf Geräten mit DPR 3 bis zu 3fach gezeichnet (HB = Obergrenze, sinkt bei Last bis 2)
+let LITE = 0, RS = 1, HB = 3;
+const SHARP = () => SET.sharp === 'immer' && SET.gfx !== 'niedrig';
 const FANCY = () => !LITE && SET.gfx !== 'niedrig';
 // Bewegung reduzieren: Systemeinstellung oder Schalter in den Einstellungen (kein Wackeln, weniger Konfetti, nichts hüpft)
 const RMQ = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)'); } catch (e) { return null; } })();
@@ -2478,14 +2484,15 @@ function nodeLight(n) { const L = NLIGHT[n.kind]; if (L && n.left > 0) addL(L[0]
 
 function resize() {
   const r = cv.getBoundingClientRect(); cw = r.width || 1; ch = r.height || 1;
-  const base = Math.min(LOW() ? 1.5 : 2, window.devicePixelRatio || 1); dpr = base * RS;
+  // 5.1.2: „Immer scharf“ zeichnet auf hochauflösenden Handys bis 3fach (HB), sonst wie bisher höchstens 2fach
+  const top = Math.min(LOW() ? 1.5 : SHARP() ? 3 : 2, window.devicePixelRatio || 1), base = Math.min(top, SHARP() ? Math.max(2, HB) : top); dpr = base * RS;
   cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr);
   Z = Math.max(0.9, Math.min(cw, ch * 0.7) / 380);
   // 5.1 (Paket F): breite Querformat-Bildschirme (Desktop): HUD, Ziel-Kasten, Pfeil und Banner wachsen mit (720p ≈ 1,1, 1080p = 1,6); Handys bleiben bei 1
   SIDE = cw >= 900 && ch >= 500 && cw > ch; UIS = SIDE ? clamp(ch / 640, 1, 1.6) : 1;
   try { const ds = document.documentElement.style; ds.setProperty('--ui', UIS.toFixed(3)); ds.setProperty('--uc', (SIDE ? clamp(ch / 800, 1, 1.4) : 1).toFixed(3)); } catch (e) {}
   // Bilder und Bodenkacheln richten sich nach der vollen Auflösung: die Leistungsautomatik muss nichts neu malen
-  const nSR = clamp(Math.ceil(base * Z * 2) / 2, 1, 3), nGS = LOW() ? 1 : clamp(base * Z, 1, 1.75);
+  const nSR = clamp(Math.ceil(top * Z * 2) / 2, 1, 3), nGS = LOW() ? 1 : clamp(top * Z, 1, 1.75);
   if (nSR !== SR) { SR = nSR; SPR.clear(); }
   if (nGS !== GS) { GS = nGS; flushChunks(); }
   for (const k in GR) delete GR[k];
@@ -12311,28 +12318,46 @@ function portalSync() {
   try { if (on) PORTAL.gameplayStart(); else PORTAL.gameplayStop(); } catch (e) {}
 }
 let loopErr = 0;
-// 4.4 Leistungsautomatik: gleitender Mittelwert der echten Bildabstände. Unter ~34 Bildern/s über mehrere Bilder werden erst
-// Schatten, Wiegen, Lichtschein, Glitzern, Lichtnetz, Gischt und Rauch ausgedünnt, dann die Auflösung in zwei Stufen gesenkt;
-// laufen die Bilder danach eine Weile wieder flüssig, kommt Stufe um Stufe alles zurück (Wartezeit verdoppelt sich, wenn es
-// gleich wieder ruckelt, damit nichts flackert).
-const PG = { ema: 16.7, n: 0, ok: 0, hold: 8, upAt: -1e9, on: true, hits: 0 };
+// 4.4 Leistungsautomatik, 5.1.2 neu: gemessen wird die Arbeit je Bild (update + draw + HUD in loop), nicht der Bildabstand.
+// iOS taktet requestAnimationFrame im Stromsparmodus (und teils als Home-Bildschirm-App) fest auf 30 Bilder/s: die Abstände
+// liegen dann ruhig bei 33 ms, obwohl jedes Bild nur wenige ms kostet. Das ist kein langsames Gerät, die Auflösung bleibt.
+// PG.per = Takt des Geräts (kürzester Abstand, gibt sehr langsam nach), PG.miss = Anteil ausgelassener Takte (ruckeln).
+// Stufen: LITE 1 = teure Zierde aus, LITE 2/3 = geringere Auflösung. Anlass: hohe Arbeit, dauerhaft unter ~24 Bildern/s oder
+// häufig ausgelassene Takte (gemessen am eigenen Takt des Geräts, eine feste 30er-Sperre zählt also nicht);
+// auf Geräten mit DPR ≥ 2 nie unter RS 0,85. „Immer scharf“: nur Zierde und HB (3 → 2,5 → 2), RS bleibt 1.
+// Läuft es wieder flüssig, kommt nach wenigen Sekunden Stufe um Stufe alles zurück (Wartezeit verdoppelt sich bei Pendeln).
+const PG = { ema: 4, iv: 16.7, per: 0, f: 0, miss: 0, n: 0, ok: 0, hold: 4, upAt: -1e9, on: true, hits: 0 };
+const liteRS = v => SHARP() || v < 2 ? 1 : (window.devicePixelRatio || 1) >= 2 ? (v >= 3 ? 0.85 : 0.92) : (v >= 3 ? 0.65 : 0.8);
 function setLite(v) {
-  v = Math.max(0, Math.min(3, v | 0)); if (v === LITE) return; LITE = v;
-  const rs = v >= 3 ? 0.65 : v === 2 ? 0.8 : 1; if (rs !== RS) { RS = rs; resize(); }
+  v = Math.max(0, Math.min(SHARP() ? 1 : 3, v | 0)); if (v === LITE) return; LITE = v;
+  const rs = liteRS(v); if (rs !== RS) { RS = rs; resize(); }
   dnView(); PFX.setQuality(LOW() || LITE ? 'low' : 'high');
 }
-function perfGuard(ms, now) {
-  if (!PG.on || ms <= 0 || ms > 120 || document.hidden || state !== 'play') return;   // Hänger, Hintergrund und Menüs zählen nicht
-  PG.ema += (ms - PG.ema) * 0.15; PG.n++;
-  if (LITE < 3 && PG.ema > 29 && PG.n > 8) { if (!LITE && now - PG.upAt < 30000) PG.hold = Math.min(120, PG.hold * 2); PG.hits++; PG.n = 0; PG.ok = 0; setLite(LITE + 1); return; }
-  if (LITE) {
-    PG.ok = PG.ema < 22 ? PG.ok + ms / 1000 : 0;
-    if (PG.ok > PG.hold) { PG.n = 0; PG.ok = 0; PG.upAt = now; setLite(LITE - 1); }
+function setHB(v) { v = Math.max(2, Math.min(3, v)); if (v !== HB) { HB = v; if (SHARP() && (window.devicePixelRatio || 1) > 2) resize(); } }
+function perfGuard(work, iv, now) {
+  if (!PG.on || iv <= 0 || iv > 120 || !(work >= 0) || document.hidden || state !== 'play') return;   // Hänger, Hintergrund und Menüs zählen nicht
+  PG.ema += (Math.min(work, 45) - PG.ema) * 0.1; PG.iv += (iv - PG.iv) * 0.1; PG.n += iv / 1000;   // einzelne lange Bilder (Bilder neu malen) zählen nur gedeckelt; PG.n = Sekunden seit der letzten Stufe
+  // Takt: folgt kürzeren Abständen rasch (einzelne Ausreißer nur teilweise), längeren nach den ersten 60 Bildern nur sehr langsam:
+  // eine 30er-Sperre ab Start gilt so gleich als Takt, ein Wechsel mitten im Spiel nach ~10 s; dauerhaft halbe Bildrate nach 60 Hz zählt als Ruckeln
+  PG.f++; PG.per = !PG.per ? iv : PG.per + (iv - PG.per) * (iv < PG.per ? 0.3 : PG.f < 60 ? 0.1 : 0.001);
+  PG.miss += ((iv > PG.per * 1.6 ? 1 : 0) - PG.miss) * 0.08;
+  // slow: hohe Arbeit, oder dauerhaft unter ~24 Bildern/s (dann bremst das Zeichnen selbst; eine 30er-Sperre liegt darüber)
+  const bud = PG.per > 26 ? 28 : 22, slow = PG.ema > bud || PG.iv > 42, jank = PG.miss > 0.3;
+  const hbUp = SHARP() && HB > 2 && (window.devicePixelRatio || 1) > 2;
+  if (PG.n > 1.5 && (slow || jank) && (hbUp || LITE < (SHARP() ? 1 : 3))) {
+    if (!LITE && now - PG.upAt < 30000) PG.hold = Math.min(60, PG.hold * 2);
+    PG.hits++; PG.n = 0; PG.ok = 0;
+    if (hbUp && slow) setHB(HB - 0.5); else setLite(LITE + 1);
+    return;
+  }
+  if (LITE || (SHARP() && HB < 3)) {
+    PG.ok = PG.ema < bud * 0.6 && PG.miss < 0.15 && PG.iv < 36 ? PG.ok + iv / 1000 : 0;
+    if (PG.ok > PG.hold) { PG.n = 0; PG.ok = 0; PG.upAt = now; if (LITE) setLite(LITE - 1); else setHB(HB + 0.5); }
   }
 }
 function loop(now) {
   requestAnimationFrame(loop);   // zuerst: ein Fehler darf das Spiel nie anhalten
-  try { perfGuard(now - last, now); } catch (e) {}
+  const t0 = performance.now(), iv = now - last;
   const dt = Math.min(0.033, Math.max(0, (now - last) / 1000)); last = now;
   if (document.hidden && state === 'play' && PAUSE()) return;   // 4.5: im Hintergrund läuft im Pause-Modus nichts weiter
   try { update(dt); } catch (e) { if (loopErr++ < 3) console.warn('update', e); }
@@ -12340,6 +12365,7 @@ function loop(now) {
   if (state === 'play') {
     try { if ((hudT -= dt) <= 0) { hudT = 0.1; updateHud(); updateSheet(); updateBlast(); updateClock(); toastPos(); } updateOptTog(); updateOpenBtn(); ctlTick(); } catch (e) { if (loopErr++ < 3) console.warn('hud', e); }
   }
+  try { perfGuard(performance.now() - t0, iv, now); } catch (e) {}   // 5.1.2: Arbeit dieses Bildes und Abstand zum vorigen
   try { audioTick(dt); } catch (e) { if (loopErr++ < 3) console.warn('audio', e); }
   try { portalSync(); } catch (e) {}
   if (state === 'play') {
@@ -12811,6 +12837,7 @@ const NEWS51 = !/^5\.0\./.test(VERSION);
 const NTOP = () => NEWS51 && (window.innerHeight || 0) >= 640 ? 4 : 3;   // Neu-Karte: so viele Zeilen oben offen (5.1: alle vier 5.1-Punkte, auch die Computer-Tasten; auf sehr niedrigen Schirmen 3, damit „Weiter“ sichtbar bleibt)
 const NEWS = [
   ...(NEWS51 ? [
+  tx('news.512a', '5.1.2: Schärfere Darstellung auf dem Handy. Neu in den Einstellungen: „Schärfe“ (Automatisch oder Immer scharf)'),
   ...(PORTAL.noRang ? [] : [tx('news.511a', '5.1.1: 🏆 Rangliste jetzt direkt oben im Bild, neben dem Zahnrad. Wenn du mitmachst, steht dort dein Platz')]),
   tx('news.51a', '5.1: Schürfland gibt es jetzt auch auf Englisch. Die Sprache stellst du in den Einstellungen um'),
   tx('news.51b', '5.1: Gebäude öffnest du durch Antippen (👆, am Computer auch E oder Enter). An der Rampe nimmst du einzelne Waren, 🎒 oben zeigt den Rucksack'),
@@ -12966,6 +12993,7 @@ function showSettings(from) {
   const tg = (k, on, a, b) => `<button class="tog${on ? '' : ' off'}" data-set="${k}">${on ? a : b}</button>`;
   const LANGSEL = 'Sprache / Language', LANGS = [['de', 'Deutsch'], ['en', 'English']];   // i18n-ok: Sprachwahl steht immer zweisprachig, Sprachnamen in eigener Sprache
   const ON = tx('card.s.on', 'An'), OFF = tx('card.s.off', 'Aus'), HI = tx('card.s.hi', 'Hoch'), LO = tx('card.s.lo', 'Niedrig');
+  const sharpNote = () => SET.sharp === 'immer' ? tx('card.s.sh.nm', 'Nie geringere Auflösung, braucht mehr Akku') : tx('card.s.sh.na', 'Senkt Details nur kurz, wenn das Spiel ruckelt');
   const leaveNote = () => PAUSE() ? tx('card.s.leaveP', 'Nichts läuft weiter, solange das Spiel zu ist.') : tx('card.s.leaveW', 'Helfer und Maschinen arbeiten weiter, höchstens 2 Std.');
   showCard(`
     <h2>${from === 'play' ? '⏸️ ' + tx('card.p.t', 'Pausiert') : tx('card.m.opt', 'Einstellungen')}</h2>
@@ -12978,6 +13006,8 @@ function showSettings(from) {
       ${[['sfx', tx('card.s.sfx', 'Effekte')], ['amb', tx('card.s.amb', 'Umgebung')], ['mus', tx('card.s.mus', 'Musik')]].map(([k, n]) => `<div class="optc"><label for="v-${k}"><span>${n}</span><span id="v-${k}-n">${pct(Math.round(SET[k] * 100))}</span></label><input type="range" class="sld" id="v-${k}" data-vol="${k}" min="0" max="100" step="5" value="${Math.round(SET[k] * 100)}" aria-label="${tx('card.s.vol', '{n} Lautstärke', { n })}"></div>`).join('')}
       <div class="opt tc"><span>${tx('card.s.vib', 'Vibration')}</span>${tg('vib', SET.vib, ON, OFF)}</div>
       <div class="opt"><span>${tx('card.s.gfx', 'Grafik')}</span>${tg('gfx', !LOW(), HI, LO)}</div>
+      <div class="optc"><span>${tx('card.s.sharp', 'Schärfe')}</span><div class="seg" role="group" aria-label="${tx('card.s.sharp', 'Schärfe')}">${[['auto', tx('card.s.sh.auto', 'Automatisch')], ['immer', tx('card.s.sh.max', 'Immer scharf')]].map(([k, n]) => `<button class="pill${(SET.sharp === 'immer') === (k === 'immer') ? ' on' : ''}" data-sharp="${k}" aria-pressed="${(SET.sharp === 'immer') === (k === 'immer')}">${n}</button>`).join('')}</div>
+        <small class="note" id="sharp-n">${sharpNote()}</small></div>
       <div class="opt"><span>${tx('card.s.wx', 'Wetter')}</span>${tg('wetter', SET.wetter, ON, OFF)}</div>
       <div class="opt"><span>${tx('card.s.dn', 'Tag/Nacht')}</span>${tg('tagnacht', tagOn(), ON, OFF)}</div>
       <div class="opt"><span>${tx('card.s.jahr', 'Jahreszeiten')}</span>${tg('jahr', jahrOn(), ON, OFF)}</div>
@@ -13016,6 +13046,13 @@ function showSettings(from) {
     SET.seasonDays = seasonDays(+b.dataset.sd); saveSet(); sfx('tap');
     try { if (typeof applySeasonDays === 'function') applySeasonDays(); } catch (e) {}
     card.querySelectorAll('[data-sd]').forEach(x => { const on = +x.dataset.sd === SET.seasonDays; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+  });
+  // 5.1.2: Schärfe: Automatisch oder Immer scharf (Leistungsautomatik neu ab Stufe 0)
+  card.querySelectorAll('[data-sharp]').forEach(b => b.onclick = () => {
+    SET.sharp = b.dataset.sharp === 'immer' ? 'immer' : 'auto'; saveSet(); sfx('tap');
+    HB = 3; PG.n = 0; PG.ok = 0; PG.hold = 4; const l = LITE; LITE = -1; setLite(SHARP() ? Math.min(l, 1) : l); resize();
+    card.querySelectorAll('[data-sharp]').forEach(x => { const on = x.dataset.sharp === SET.sharp; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    const n = $('sharp-n'); if (n) n.textContent = sharpNote();
   });
   card.querySelectorAll('[data-leave]').forEach(b => b.onclick = () => {
     SET.leave = b.dataset.leave === 'weiter' ? 'weiter' : 'pause'; saveSet(); sfx('tap');
