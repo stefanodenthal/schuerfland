@@ -232,18 +232,27 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
 #optTog{position:absolute;left:0;top:0;display:flex;align-items:center;gap:10px;min-height:44px;padding:5px 5px 5px 12px;border-radius:14px;background:rgba(35,48,31,.9);color:var(--paper);font-family:var(--f-body);font-weight:900;font-size:15px;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,.25)}
 #optTog b{min-width:52px;padding:6px 10px;border-radius:10px;background:var(--mint);color:#0d3b26;box-shadow:0 3px 0 #23935f;font-family:var(--f-display);font-weight:400;font-size:16px}
 #optTog b.off{background:#d9d4c4;color:#6d6758;box-shadow:0 3px 0 #b9b3a2}
+/* 5.0.3: Rucksack-Knopf im HUD, Waren einzeln nehmen, Gebäude nur auf Antippen öffnen */
+#bag{pointer-events:auto;border:0;font-family:var(--f-body);color:var(--ink);cursor:pointer}
+.it .tk{grid-column:1/4;width:100%;margin-top:3px}
+.take{grid-column:1/-1;background:#fff3d6;border-radius:12px;padding:8px;box-shadow:inset 0 0 0 2px #e2902b}
+.take .tkb{display:flex;gap:6px;margin-top:6px}.take .tkb .buy{flex:1 1 0;min-width:0}
+.bagl .it{grid-template-columns:auto 1fr}.bagl .it .ct{grid-column:2/3}.bagl .it .buy{grid-column:1/3;width:100%;margin-top:3px}
+#openBtn{position:absolute;left:0;top:0;min-height:48px;padding:8px 16px;border-radius:14px;background:var(--mint);color:#0d3b26;box-shadow:0 4px 0 #23935f,0 6px 14px rgba(0,0,0,.25);font-family:var(--f-display);font-size:18px;white-space:nowrap;border:0;cursor:pointer;animation:pulse 1.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){#openBtn{animation:none}}
 </style>
 
 <div id="game">
   <canvas id="cv"></canvas>
   <div id="hud" hidden>
-    <div class="row"><div class="chip" id="coins"><span class="coin"></span>0</div><div class="chip" id="bag">🎒 0/20</div><div id="saved" role="status" aria-label="Speichern fehlgeschlagen"></div><button class="chip" id="lagerBtn" hidden aria-label="Dorf-Menü">☰ Dorf</button>
+    <div class="row"><div class="chip" id="coins"><span class="coin"></span>0</div><button class="chip" id="bag" aria-label="Rucksack ansehen">🎒 0/20</button><div id="saved" role="status" aria-label="Speichern fehlgeschlagen"></div><button class="chip" id="lagerBtn" hidden aria-label="Dorf-Menü">☰ Dorf</button>
       <button id="gear" aria-label="Pause und Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="4.5" stroke-dasharray="3.1 3.2"/><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.8"/></svg></button></div>
     <div id="goal"></div>
     <button id="clock" hidden aria-hidden="true" tabindex="-1"><span id="clockTxt"></span></button>
   </div>
   <button id="blast" hidden aria-label="Sprengen"></button>
   <button id="optTog" hidden></button>
+  <button id="openBtn" hidden></button>
   <div id="fade"></div>
   <div id="sheet" hidden></div>
   <div id="toast" role="status" aria-live="polite"></div>
@@ -259,7 +268,7 @@ const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
 const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.0.2', SAVE_V = 5.0;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.0.3', SAVE_V = 5.0;
 const toastEl = $('toast');
 try { document.documentElement.lang = 'de'; } catch (e) {}
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
@@ -635,7 +644,7 @@ const SRC = { holz: 'Bäumen', hartholz: 'Eichen im Tannenwald', stein: 'Felsen'
 const listDe = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1] : a[0] || '';
 function srcHint(k) { if (RAWOF[k]) { const o = RAWOF[k]; return RES[k].name + ' (' + BLD[o.b].name + ': ' + Object.keys(o.rec.in).map(r => RES[r].name).join(' + ') + ')'; } return RES[k].name + (SRC[k] ? ' an ' + SRC[k] : ''); }
 let plateHintT = -9;
-const HLOAD = 8, HSPEED = 105, OFFCAP = 2 * 3600;   // 4.3: echte Tragkraft (8 bis 12 im Arm), mehr mit Korb und Karren
+const HLOAD = 8, HSPEED = 82, OFFCAP = 2 * 3600;   // 4.3: echte Tragkraft (8 bis 12 im Arm), mehr mit Korb und Karren · 5.0.3: Helfer laufen ruhiger (105 → 82, −22 %, Spieltest)
 const LCAP = [150, 300, 600, 1200, 2500, 5000, 10000], LCOST = [80, 250, 700, 2000, 5000, 12000];
 // 5.0: ein Marktstand und eine Werkbank, beide im Dorf (MARKETS[0], BENCHES[0])
 const STATIONS = [
@@ -808,7 +817,8 @@ const SOHLE_MAX = SOHLEN.length - 1;      // 7; Etage 8+ ist die Tiefe
 const DRILLMUL = [1, 3, 8, 20, 50];        // Bohrer-Kosten je Stufe 1..5 (× drillBase); Tempo je Stufe HSPD[lv − 1]
 const BERG_REGROW = 1.5;                   // Erze unter Tage wachsen in NODE[kind].regrow × 1,5 nach (Abschnitt 3.2)
 // Förderturm (S.deep.lift 1–4): bringt den Bohrer-Puffer S.deep.buf ins Lager. Stufe 1 kommt mit dem Bauziel foerderturm
-const LIFTR = [0, 1, 2.5, 6, 12], LIFTBUF = [0, 80, 200, 500, 1200], LIFTCOST = [0, 0, 1500, 5000, 12000];
+// 5.0.3: Stufe 1 schneller (60 → 90/min) und größer (80 → 150), Stufe 2 Puffer 200 → 250: drei Bohrer auf Stufe 1 machen schon ~80/min
+const LIFTR = [0, 1.5, 2.5, 6, 12], LIFTBUF = [0, 150, 250, 500, 1200], LIFTCOST = [0, 0, 1500, 5000, 12000];
 // Tiefe (Etage 8+): Zufallsetagen wie 4.5
 const DEEP_ORES = [['rock', 1, 3], ['eisen', 1, 2], ['kupfer', 1, 3.2], ['kohle', 3, 2.2], ['gold', 4, 1.3], ['silber', 7, 2.2], ['kristall', 12, 1.1], ['mithril', 18, 1.7], ['sternenerz', 28, 1.3]];
 // Eingefroren aus 4.5: die vier Tiefenbohrer (Migration 7.8: a → dr[2], b → dr[5], c → dr[6], d → dr[7])
@@ -4166,7 +4176,7 @@ const TUT = [
   { t: tx('tut.2', 'Bring 15 Holz zum Bauplatz „Lager“ im Dorf'), ok: () => !!S.done.lager, pay: 5 },
   { t: tx('tut.3', 'Stell dich auf die Rampe: dein Rucksack wandert ins Lager'), ok: () => lagerTotal() > 0, pay: 5 },
   { t: tx('tut.4', 'Verkaufe 5 Holz am Marktstand neben dem Lager'), ok: () => S.ftue.sold - S.ftue.s3 >= 5, pay: 25 },
-  { t: tx('tut.5', 'Kauf an der Werkbank einen größeren Rucksack'), ok: () => S.up.bag >= 2, pay: 10 },
+  { t: tx('tut.5b', 'Tippe die Werkbank an und kauf einen größeren Rucksack'), ok: () => S.up.bag >= 2, pay: 10 },
 ];
 function tutTick() {
   if (S.tut >= TUT.length || state !== 'play' || deep) return;
@@ -4305,6 +4315,8 @@ function stepOut(st, site) {
   }
   if (st.s === 'put') return { t: bringTxt(st), tgt: PL[st.to].pad, kind: 'raw:' + st.r + '>' + st.to, use: true };
   if (st.s === 'berg') {
+    // 5.0.3: der Förderturm ist voll und hat das Erz: erst Lager ausbauen bzw. Turm leeren/ausbauen (kein Weg ins Bergwerk nötig)
+    { const w = liftWhy(); if (w && (S.deep.buf[st.r] || 0) > 0) { if (w === 'lager') return lagerStep(); const tp = TPAD(); if (tp) return { t: RES[st.r].name + ': ' + tx('goal.turm', 'Förderturm antippen · leeren oder ausbauen'), tgt: tp, kind: 'turm' }; } }
     // Erz aus dem Bergwerk: unten abbauen; der Förderkorb bringt den Rucksack ins Lager
     const t = RES[st.r].name + ': ' + tx('berg.g.korb2', 'Förderkorb → Sohle') + ' ' + st.so + (st.to ? ' · ' + resN(st.n, st.r) + ' ' + zumB(st.to) : '');
     const u = deliver(st.has, st.to ? st.n : st.n + st.has); return { t, tgt: u ? (st.to ? PL[st.to].pad : site || SPAD) : SPAD, kind: 'berg:' + st.r, use: u };
@@ -4312,14 +4324,14 @@ function stepOut(st, site) {
   if (st.s === 'deeper') return bergStep(st.so, RES[st.r].name);
   if (st.s === 'tool') {
     const u = UPG[st.tool], lv = S.up[st.tool] + 1, c = u.costs[S.up[st.tool] - 1], what = u.name + ' ' + tx('goal.stufe', 'Stufe') + ' ' + lv + ' ' + tx('goal.forres', 'für') + ' ' + RES[st.r].name;
-    return c === undefined || S.coins >= c ? { t: what + ': ' + tx('goal.atbench', 'an der Werkbank kaufen'), tgt: nearestBench(), kind: 'tool' } : coinStep(c, what);
+    return c === undefined || S.coins >= c ? { t: what + ': ' + tx('goal.atbench2', 'Werkbank antippen und kaufen'), tgt: nearestBench(), kind: 'tool' } : coinStep(c, what);
   }
   if (st.s === 'build') return { t: tx('goal.first', 'Erst') + ' ' + BLD[st.b].name + ' ' + tx('goal.build', 'bauen'), tgt: PL[st.b] || site, kind: 'build' };
-  if (st.s === 'mrec') return { t: BLD[st.b].name + ': ' + tx('goal.mrec', 'Rezept auf „Auto“ stellen (gelber Platz)'), tgt: PL[st.b].pad, kind: 'mrec' };
+  if (st.s === 'mrec') return { t: BLD[st.b].name + ': ' + tx('goal.mrec2', 'gelben Platz antippen · Rezept auf „Auto“'), tgt: PL[st.b].pad, kind: 'mrec' };
   if (st.s === 'lfull') return lagerStep();
   // busy: die Maschine hat alles. Dauert es noch lange und reicht das Geld, lohnt eine Maschinenstufe (bestehender Ausbau im Bogen am gelben Platz)
   const ob = RAWOF[st.k], wait = st.n && ob ? st.n / Math.max(0.01, mrate(st.b, ob.i)) * 60 : 0, mc = mlvCost(st.b);
-  if (wait > 120 && mc !== null && S.coins >= mc) return { t: BLD[st.b].name + ' ' + tx('goal.mlv', 'ausbauen: schneller fertig') + ' (💰 ' + fmt(mc) + ', ' + tx('goal.noch', 'noch etwa') + ' ' + Math.ceil(wait / 60) + ' min)', tgt: PL[st.b].pad, kind: 'mlv:' + st.b };
+  if (wait > 120 && mc !== null && S.coins >= mc) return { t: BLD[st.b].name + ' ' + tx('goal.mlv2', 'antippen und ausbauen: schneller fertig') + ' (💰 ' + fmt(mc) + ', ' + tx('goal.noch', 'noch etwa') + ' ' + Math.ceil(wait / 60) + ' min)', tgt: PL[st.b].pad, kind: 'mlv:' + st.b };
   // solange eine Nebenaufgabe (B5)
   return sideStep(tx('goal.while', 'Während') + ' ' + derB(st.b) + ' ' + tx('goal.works', 'arbeitet') + ': ') || { t: tx('goal.busy', 'In Arbeit') + ': ' + BLD[st.b].name + ' ' + tx('goal.makes', 'macht') + ' ' + RES[st.k].name, tgt: PL[st.b].pad, kind: 'busy:' + st.b };
 }
@@ -4348,7 +4360,7 @@ function siteStep(p) {
     // B5: kleiner Rest, und ein Träger ist schon damit unterwegs: nicht extra laufen
     let sum = 0, rest = 0; for (const k in hp) sum += hp[k]; for (const k in p.cost) rest += Math.max(0, p.cost[k] - (pd[k] || 0));
     if (sum <= Math.max(3, rest * 0.1) && helpers.some(h => (h.type === 'traeger' && (p === nextGoal() || autoOn(p))) || (h.task && h.task.kind === 'plate' && h.task.id === p.id))) return { t: tx('goal.carriers', 'Träger bringen den Rest'), tgt: p, kind: 'carry', soft: true };
-    return { t: tx('goal.hol', 'Hol') + ' ' + resList(hp) + ' ' + tx('goal.ausl', 'aus dem Lager') + ' (' + tx('goal.holbtn', '🎒 Holen') + ') · ' + tx('goal.dannhin', 'dann zum Bauplatz'), tgt: LPAD, kh: '|hol', kind: 'hol' };
+    return { t: tx('goal.hol', 'Hol') + ' ' + resList(hp) + ' ' + tx('goal.ausl', 'aus dem Lager') + ' (' + tx('goal.holbtn2', '👆 Lager · 🎒 Holen') + ') · ' + tx('goal.dannhin', 'dann zum Bauplatz'), tgt: LPAD, kh: '|hol', kind: 'hol' };
   }
   const need = carryNeed(p) || {};
   if (Object.keys(need).some(k => outAll(k) > 0)) return { t: tx('goal.soon', 'Gleich im Lager · dann holen und hintragen'), tgt: LPAD, kind: 'soon' };
@@ -4364,7 +4376,7 @@ function popStep(g) {
     if (!okJ.length) { const j = jobs.find(j => toolFor(j)); if (j) return { t: pre + RES[toolFor(j)].name + ' ' + tx('goal.toolmiss', 'fehlt zum Anheuern · Werkzeugmacher'), tgt: PL.werkzeugm || nearestBench(), kind: 'pop' }; }
     const cs = okJ.map(j => HELP[j].costs[S.helpers.filter(x => x.type === j).length]).filter(x => x !== undefined), c = cs.length ? Math.min(...cs) : 0;
     if (c && S.coins < c) return coinStep(c, pre + tx('goal.hire2', 'Helfer anheuern'));
-    return { t: pre + tx('goal.hire3', 'Helfer an der Werkbank anheuern'), tgt: nearestBench(), kind: 'pop' };
+    return { t: pre + tx('goal.hire4', 'Werkbank antippen · Helfer anheuern'), tgt: nearestBench(), kind: 'pop' };
   }
   if (popWait()) return { t: pre + tx('goal.zuzug', 'Bewohner ziehen ein'), tgt: null, wait: true, kind: 'pop' };
   const h = popHouse(g); if (h) return { site: h };
@@ -4375,11 +4387,11 @@ function bergStep(want, what) {
   const f = S.berg.sohle, o = floorObs(f), pre = tx('hint.berg', 'Bergwerk:') + ' ' + (what ? what + ', ' : '') + tx('berg.sohle', 'Sohle') + ' ' + want + ' · ', down = tx('berg.g.korb2', 'Förderkorb → Sohle') + ' ' + f;
   if (S.berg.open[f] || o.type === 'frei') return { t: pre + down + ' · ' + tx('berg.g.durch', 'durch den Schacht'), tgt: SPAD, kind: 'berg' };
   if (o.type === 'wasser') {
-    if (!S.deep.pump) return S.coins >= PUMPCOST ? { t: pre + tx('berg.g.pumpk', 'Pumpe am Förderkorb kaufen') + ' (💰 ' + fmt(PUMPCOST) + ')', tgt: SPAD, kind: 'berg' } : coinStep(PUMPCOST, pre + tx('berg.pumpe', 'Pumpe'));
+    if (!S.deep.pump) return S.coins >= PUMPCOST ? { t: pre + tx('berg.g.pumpk2', 'Förderkorb antippen · Pumpe kaufen') + ' (💰 ' + fmt(PUMPCOST) + ')', tgt: SPAD, kind: 'berg' } : coinStep(PUMPCOST, pre + tx('berg.pumpe', 'Pumpe'));
     return { t: pre + down + ' · ' + tx('berg.g.pump2', 'am Schacht abpumpen'), tgt: SPAD, kind: 'berg' };
   }
   if (o.type === 'hart') {
-    if (S.up.pick < o.tier) { const lv = S.up.pick + 1, c = UPG.pick.costs[S.up.pick - 1], w = pre + UPG.pick.name + ' ' + tx('goal.stufe', 'Stufe') + ' ' + lv; return c === undefined || S.coins >= c ? { t: w + ': ' + tx('goal.atbench', 'an der Werkbank kaufen'), tgt: nearestBench(), kind: 'tool' } : coinStep(c, w); }
+    if (S.up.pick < o.tier) { const lv = S.up.pick + 1, c = UPG.pick.costs[S.up.pick - 1], w = pre + UPG.pick.name + ' ' + tx('goal.stufe', 'Stufe') + ' ' + lv; return c === undefined || S.coins >= c ? { t: w + ': ' + tx('goal.atbench2', 'Werkbank antippen und kaufen'), tgt: nearestBench(), kind: 'tool' } : coinStep(c, w); }
     return { t: pre + down + ' · ' + tx('berg.g.fels', 'Fels am Schacht abbauen'), tgt: SPAD, kind: 'berg' };
   }
   if (o.type === 'dunkel') {
@@ -4387,7 +4399,7 @@ function bergStep(want, what) {
     const n = LAMPLAT - lhas('laterne') - cnt(S.stack, 'laterne') - outAll('laterne');
     if (n > 0) { const st = planNeed('laterne', n, {}, 0); return stepOut(st, null); }
     if (S.coins < LAMPCOST) return coinStep(LAMPCOST, pre + tx('berg.lampe', 'Laternenkette'));
-    return { t: pre + tx('berg.g.lampk', 'Laternenkette am Förderkorb kaufen'), tgt: SPAD, kind: 'berg' };
+    return { t: pre + tx('berg.g.lampk2', 'Förderkorb antippen · Laternenkette kaufen'), tgt: SPAD, kind: 'berg' };
   }
   if (o.type === 'cp') {
     const c = cpCost(f), st = planSite(c.cost, S.deep.cpPaid);
@@ -4415,6 +4427,8 @@ function goalRaw() {
   const toPlate = tg => full && carry ? g : tg;
   // G: Lager voll, und der Rucksack (halb) voll: erst Platz schaffen (sonst stehen Maschinen, und Ware landet am Marktstand)
   if (S.done.lager && lfree() <= 0 && S.stack.length >= cap() * 0.5 && !carry && !carryH) return so(lagerStep(), false);
+  // 5.0.3: an der Rampe selbst genommene Ware, die das Ziel nicht braucht, füllt den Rucksack: kurzer Hinweis (kein Pfeil zum Bauplatz, keine Schleife)
+  if (full && !carry && !carryH && packHeld && onPadAt(LPAD)) { const fr = bagForeign(); if (fr.length) return out(tx('goal.fremd', 'Rucksack') + ': ' + listDe(fr.slice(0, 2).map(r => RES[r].name)) + ' ' + tx('goal.fremd2', 'nicht fürs Ziel · an der Rampe zurücklegen (🎒)'), LPAD, '|fr', 'full'); }
   // 5.4: ruhige Ziel-Zeile. Der Tipp beschreibt die Aufgabe, der Pfeil den nächsten Handgriff. Voller Rucksack ohne Ware fürs Ziel: erst leeren,
   // außer er trägt Rohstoff, den der Schritt braucht (z. B. Hartholz fürs Sägewerk): dann dorthin
   if (full && !carry && !carryH) {
@@ -4511,7 +4525,7 @@ function sailTo(n) {
   if (n < 0) { const nx = nextIsle(); META.islands.push({ n: nx.n, theme: nx.theme, seed: (Math.floor(Math.random() * 4294967295) >>> 0) || 7, mirror: nx.n % 2 === 1, name: nx.name }); META.next = nx.n + 1; n = nx.n; }
   else if (n > 0 && !META.islands.some(x => x.n === n)) return false;
   META.active = n; saveMeta(); save(false);
-  resetting = true; state = 'sail'; sheet.hidden = true; sheetMode = null; sheetMan = null; hud.hidden = true; blastEl.hidden = true; optTogEl.hidden = true; optTogK = '';
+  resetting = true; state = 'sail'; sheet.hidden = true; sheetMode = null; sheetMan = null; hud.hidden = true; blastEl.hidden = true; optTogEl.hidden = true; optTogK = ''; openBtnEl.hidden = true; openK = ''; tapOpen = null;
   const isl = n ? META.islands.find(x => x.n === n) : null;
   try { fadeEl.style.cssText = 'display:flex;align-items:center;justify-content:center;color:#fff3d6;font:24px ' + FONT + ';text-align:center;opacity:0'; fadeEl.textContent = '⛵ Kurs auf ' + (isl ? isl.name : 'Schürfland'); } catch (e) {}
   sfx('horn'); sailing = { t: 0 };
@@ -4657,6 +4671,44 @@ function lagDone() {
   if (lagN) { fxEvent('drop', { x: LAGER.x, y: LAGER.y, n: lagN, to: 'lager' }); vib(15); }
   lagN = 0; packN = {}; packG = null; save();
 }
+// 5.0.3 (Spieltest): an der Rampe einzelne Waren aus dem Lager nehmen (+1, +10, Max) und im Rucksack-Bogen zurücklegen.
+// Nach „Nehmen“ bleibt der Rucksack, wie er ist (packHeld, wie nach „🎒 Holen“). Erst beim nächsten Betreten der Rampe lagert er wieder ein
+let takeOpen = null;
+const rampOk = () => !!S.done.lager && S.tut >= 3 && onPadAt(LPAD);
+function takeGo(r, v) {
+  if (!rampOk() || !RES[r] || !lhas(r)) return false;
+  const room = cap() - S.stack.length;
+  if (room <= 0) { toast('🎒 ' + tx('take.full', 'Rucksack voll · erst etwas zurücklegen')); sfx('warn', { vol: 0.5 }); return false; }
+  const n = Math.min(lhas(r), room, v === 'max' ? 1e9 : v === '10' ? 10 : 1); if (n <= 0) return false;
+  ltake(r, n); for (let j = 0; j < n; j++) { S.stack.push(r); if (j < 8) fly(LAGER.x + 40 + rnd(-14, 14), LAGER.y - 30, undefined, undefined, r, -j * 0.06); }
+  packHeld = true; packReq = false; lagLastT = T;
+  toast('🎒 ' + resN(n, r) + ' ' + tx('take.got', 'genommen') + ' · ' + S.stack.length + '/' + cap()); sfx('store', { pitch: 1.2 });
+  return true;
+}
+function putBack(r) {
+  if (!rampOk() || !RES[r]) return false;
+  const have = cnt(S.stack, r); if (!have) return false;
+  const n = Math.min(have, lfree());
+  if (n <= 0) { toast('📦 ' + tx('lag.voll', 'Lager voll – ausbauen oder verkaufen')); sfx('warn', { vol: 0.5 }); return false; }
+  let k = 0; for (let i = S.stack.length - 1; i >= 0 && k < n; i--) if (S.stack[i] === r) { S.stack.splice(i, 1); ladd(r, 1); if (k < 8) fly(pl.x, pl.y - 30, LAGER.x + 40 + rnd(-14, 14), LAGER.y - 30, r, -k * 0.06); k++; }
+  lagLastT = T;
+  toast('📦 ' + resN(k, r) + ' ' + tx('take.back', 'zurückgelegt') + (k < have ? ' · ' + tx('lag.voll', 'Lager voll – ausbauen oder verkaufen') : ''), k < have ? 2400 : 1600); sfx('store');
+  return true;
+}
+// Ware im Rucksack, die weder das Ziel noch das Wohnhaus dafür braucht
+function bagForeign() { const g = nextGoal(), gs = goalSite(), o = []; for (const r of new Set(S.stack)) if (!(g && g.cost && g.cost[r]) && !(gs && gs.cost && gs.cost[r])) o.push(r); return o; }
+const bagCount = () => { const o = {}; for (const r of S.stack) o[r] = (o[r] || 0) + 1; return o; };
+function bagHtml() {
+  const c = bagCount(), ks = Object.keys(c).sort((a, b) => c[b] - c[a]), onR = rampOk(), fr = bagForeign();
+  let h = head('🎒 ' + tx('bag.title', 'Rucksack'), S.stack.length + '/' + cap());
+  if (!ks.length) return h + '<small class="note">' + tx('bag.empty', 'Leer. Sammle etwas, oder nimm an der Rampe Waren aus dem Lager.') + '</small>';
+  h += '<small class="note">' + (onR ? tx('bag.ramp', 'Du stehst an der Rampe: „Zurücklegen“ bringt eine Ware ins Lager') : tx('bag.away', 'Zurücklegen geht an der Rampe am Lager')) + '</small><div class="grid bagl">';
+  for (const r of ks) h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(c[r])}${fr.includes(r) ? '' : ' · ' + tx('lag.goal', 'fürs Ziel')}</span>${onR ? `<button class="buy sm" data-act="putback" data-k="${r}" data-free="1"${lfree() > 0 ? '' : ' disabled'}>${tx('bag.back', 'Zurücklegen')}</button>` : ''}</div>`;
+  h += '</div>';
+  if (onR && lfree() <= 0) h += `<small class="note">⚠️ ${tx('lag.voll', 'Lager voll – ausbauen oder verkaufen')}</small>`;
+  return h;
+}
+const bagKey = () => S.stack.join() + '|' + rampOk() + (lfree() > 0) + cap();
 // Auto-Helfer ohne Arbeit (Gebiet: Auto, nichts zu sammeln) tragen fehlende Ziel-Waren aus dem Lager zum Bauplatz (wie ein Träger, eine Fuhre)
 function idleCarryJob(h) {
   if (!S.done.lager || !S.done.huette || h.load.length) return null;
@@ -5852,6 +5904,38 @@ const drillRate = (n, r) => SOHLEN[n].drill[r] * HSPD[Math.max(1, S.berg.dr[n] |
 const drillCost = n => { const lv = S.berg.dr[n] || 0; return lv >= DRILLMUL.length || !SOHLEN[n] ? null : Math.round(SOHLEN[n].drillBase * DRILLMUL[lv] / 10) * 10; };
 const drillLock = n => !S.deep.lift ? (S.done.tier2 ? tx('drill.turm2', 'Braucht den Förderturm (Bauziel in der Zeche)') : tx('drill.turm', 'Braucht den Förderturm (Bauziel nach Dorfstufe 2)')) : n > S.berg.sohle ? tx('berg.sohle', 'Sohle') + ' ' + n + tx('drill.nicht', ' noch nicht erreicht') : !(S.berg.open[n] || n === SOHLE_MAX) ? tx('drill.weg', 'Weg unter Sohle') + ' ' + n + ' ' + tx('drill.weg2', 'zuerst freimachen') : '';
 function deepBufN() { let n = 0; for (const k in S.deep.buf) n += S.deep.buf[k]; return n; }
+// 5.0.3 (Spieltest „Förderturm voll? Fehler?“): warum der Puffer voll ist. null: nicht voll; 'lager': das Lager nimmt nichts mehr; 'slow': der Turm ist zu langsam
+function liftWhy() { const D = S.deep; if (!D.lift || deepBufN() < LIFTBUF[D.lift]) return null; return S.done.lager && lfree() <= 0 ? 'lager' : 'slow'; }
+function liftTxt(w) {
+  if (w === 'lager') return tx('turm.lager', 'Lager voll · Lager ausbauen oder verkaufen');
+  const D = S.deep, c = LIFTCOST[D.lift + 1];
+  return tx('turm.slow', 'Förderturm zu langsam') + ' · ' + (c === undefined ? tx('turm.max', 'höchste Stufe: Erz selbst holen') : tx('turm.aus', 'ausbauen') + ' (' + tx('berg.fx.stufe', 'Stufe') + ' ' + D.lift + ' → ' + (D.lift + 1) + ', 💰 ' + fmt(c) + ')');
+}
+const TPAD = () => PL.foerderturm ? { x: PL.foerderturm.x, y: PL.foerderturm.y + 60 } : null;
+// Erz aus dem Puffer selbst in den Rucksack nehmen (+10 oder Max), am Platz vor dem Förderturm
+function turmTake(r, v) {
+  const D = S.deep, tp = TPAD(); if (!D.lift || !tp || !onPadAt(tp) || !(D.buf[r] > 0)) return false;
+  const room = cap() - S.stack.length;
+  if (room <= 0) { toast('🎒 ' + tx('take.full', 'Rucksack voll · erst etwas zurücklegen')); sfx('warn', { vol: 0.5 }); return false; }
+  const n = Math.min(D.buf[r], room, v === 'max' ? 1e9 : 10); D.buf[r] -= n; if (!D.buf[r]) delete D.buf[r];
+  for (let j = 0; j < n; j++) { S.stack.push(r); if (j < 8) fly(PL.foerderturm.x - 60 + rnd(-10, 10), PL.foerderturm.y, undefined, undefined, r, -j * 0.06); }
+  toast('🎒 ' + resN(n, r) + ' ' + tx('take.got', 'genommen') + ' · ' + S.stack.length + '/' + cap()); sfx('store', { pitch: 1.2 });
+  return true;
+}
+function turmHtml() {
+  const D = S.deep, nb = deepBufN(), w = liftWhy(), c = LIFTCOST[D.lift + 1], room = cap() - S.stack.length;
+  let made = 0; for (let n = 1; n <= SOHLE_MAX; n++) if (S.berg.dr[n]) for (const r in SOHLEN[n].drill) made += drillRate(n, r);
+  let h = head(tx('berg.turm', 'Förderturm'), tx('berg.fx.stufe', 'Stufe') + ' ' + D.lift + '/' + (LIFTR.length - 1));
+  if (w) h += `<small class="note">⚠️ ${liftTxt(w)}</small>`;
+  h += `<small class="note">${tx('turm.puffer', 'Puffer')} ${fmt(nb)}/${fmt(LIFTBUF[D.lift])} · ${tx('turm.bringt', 'bringt')} ${fmt(LIFTR[D.lift] * 60)}/Min · ${tx('turm.bohrer', 'Bohrer machen')} ${fmt(Math.round(made))}/Min</small>`;
+  h += row(tx('berg.turm', 'Förderturm') + ' ' + tx('turm.aus', 'ausbauen'), c === undefined ? tx('turm.maxs', 'Höchste Stufe') : tx('berg.fx.stufe', 'Stufe') + ' ' + (D.lift + 1) + ': ' + fmt(LIFTR[D.lift + 1] * 60) + '/Min · ' + tx('turm.puffer', 'Puffer') + ' ' + fmt(LIFTBUF[D.lift + 1]), c === undefined ? null : c, 'dlift', '');
+  if (w === 'lager') { const lc = LCOST[S.lager.lv - 1]; h += row(tx('lag.up', 'Lager ausbauen'), tx('lag.lv', 'Stufe') + ' ' + S.lager.lv + ' · ' + tx('lag.cap', 'Platz für') + ' ' + fmt(lcap()), lc === undefined ? null : lc, 'lup', ''); }
+  const ks = Object.keys(D.buf).filter(r => D.buf[r] > 0);
+  if (!ks.length) return h + `<small class="note">${tx('turm.leer', 'Der Puffer ist leer.')}</small>`;
+  h += `<small class="note">🎒 ${tx('turm.take', 'In den Rucksack nehmen: selbst zur Maschine oder ins Lager tragen')} · ${S.stack.length}/${cap()}</small><div class="grid">`;
+  for (const r of ks) h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(D.buf[r])}</span><div class="tkb" style="grid-column:1/4;display:flex;gap:6px;margin-top:3px"><button class="buy sm" style="flex:1" data-act="turmtake" data-k="${r}" data-v="10" data-free="1"${room > 0 ? '' : ' disabled'}>+10</button><button class="buy sm" style="flex:1" data-act="turmtake" data-k="${r}" data-v="max" data-free="1"${room > 0 ? '' : ' disabled'}>Max</button></div></div>`;
+  return h + '</div>';
+}
 
 // ---------- 5.0: Bergarbeiter unter Tage (Paket B, Abschnitt 16) ----------
 // h.cfg.work = 'berg1' … 'berg7'. Der Helfer geht oben zum Schacht, steigt ein (h.under = true) und baut die Erze seiner Sohle aus S.berg.nodes ab
@@ -10322,6 +10406,7 @@ function draw() {
   for (const b of BENCHES) if (stOpen(b) && inView(b.x, b.y, 100)) drawStationPad(b, 'b');
   if (inView(BOARD.x, BOARD.y, 100)) { drawPad(BOARD.x, BOARD.y, '#ffb3c8', 72, 44); label(BOARD.x, BOARD.y + 2, 'Aufträge', 15); }
   if (S.done.lager && inView(LPAD.x, LPAD.y, 80)) drawLagerPad();
+  { const tp = TPAD(); if (tp && S.done.foerderturm && S.deep.lift && inView(tp.x, tp.y, 80)) { drawPad(tp.x, tp.y, '#bfefff', 60, 30); label(tp.x, tp.y + 1, tx('berg.turm', 'Förderturm'), 12, '#bfefff'); } }
   if (S.done.schacht && inView(SPAD.x, SPAD.y, 80)) { drawPad(SPAD.x, SPAD.y, '#bfefff', 66, 34); label(SPAD.x, SPAD.y + 1, 'Einfahren', 13, '#bfefff'); }
   if (S.done.hafen && inView(PIERPAD.x, 3560, 160)) { blit(hafenstegSprite(true), PIERPAD.x, 3478); drawPad(PIERPAD.x, PIERPAD.y, '#ffd34d', 46, 32); label(PIERPAD.x, PIERPAD.y + 1, 'Handel', 12, '#ffe08a'); }
   if (S.done.expedition && inView(XPAD.x, XPAD.y, 80)) { drawPad(XPAD.x, XPAD.y, '#bfefff', 50, 32); label(XPAD.x, XPAD.y + 1, 'Logbuch', 12, '#bfefff'); }
@@ -10507,7 +10592,7 @@ function bergStruct(p, x, y) {
   if (litOn) addL('fenster', x + 62, y - 30, 60, 26, 0.7, 0.08);
   label(x, y - 172, tx('berg.turm', 'Förderturm'), 14, '#fff');
   if (D.lift) label(x, y - 157, tx('berg.fx.stufe', 'Stufe') + ' ' + D.lift + ' · ' + fmt(LIFTR[D.lift] * 60) + ' ' + tx('berg.permin', 'pro Minute'), 12, '#bfefff');
-  if (D.lift && deepBufN() >= LIFTBUF[D.lift]) label(x, y - 32, tx('berg.voll2', 'Puffer voll · ausbauen'), 12, '#ffb4a8');
+  { const w = D.lift ? liftWhy() : null; if (w) label(x, y - 32, liftTxt(w), 12, '#ffb4a8'); }
 }
 function renderFloor(F) {
   const gs = LOW() ? 1 : Math.min(GS, 1.5), th = F.th, R = mulberry(deepSeed(F.f) ^ 0xabc);
@@ -10580,7 +10665,7 @@ function drawDrillDeep(F) {
   ctx.fillStyle = full ? (Math.sin(T * 4) > 0 ? '#ff6a5a' : '#8f2a20') : (Math.sin(T * 6) > 0 ? '#8ef0a8' : '#3fcf8e'); E(ctx, x + 30, y - 36, 3, 3); ctx.fill();
   if (!full && !LOW() && Math.random() < 0.1) burst(x, y - 8, F.th.acc, 2, 60);
   label(x, y - 118, tx('berg.bohrer', 'Bohrer') + ' ' + lv + '/' + DRILLMUL.length, 13, '#fff');
-  if (full) label(x, y - 102, tx('berg.voll2', 'Puffer voll · ausbauen'), 11, '#ffb4a8');
+  if (full) label(x, y - 102, liftWhy() === 'lager' ? tx('turm.lager2', 'Lager voll') : tx('turm.slow', 'Förderturm zu langsam'), 11, '#ffb4a8');
 }
 // Bergarbeiter auf dieser Sohle (Abschnitt 16): dieselbe Figur wie oben, mit Spitzhacke
 function drawBergHelpers(F, list) {
@@ -10718,7 +10803,7 @@ function issues() {
   if (foodOn() && S.helpers.length && FOODS.every(f => !lhas(f)) && S.helpers.some(c => c.fed <= 0)) out.push({ t: tx('iss.food', 'Kein Essen im Lager: Helfer sind hungrig und etwas langsamer'), bad: true });
   if (pwDem > 0 && pwRatio < 1) out.push({ t: tx('iss.power', 'Zu wenig Strom: Maschinen mit Motor laufen langsamer'), bad: false });
   if (S.done.kraftwerk && pwDem > 0 && S.pw.burn <= 0 && !lhas('kohle') && !lhas('holz')) out.push({ t: tx('iss.fuel', 'Die Dampfmaschine hat kein Holz und keine Kohle'), bad: true });
-  if (S.deep.lift && deepBufN() >= LIFTBUF[S.deep.lift]) out.push({ t: tx('iss.lift', 'Bergwerk: der Förderturm kommt mit den Bohrern nicht nach'), bad: false });
+  { const w = liftWhy(); if (w) out.push({ t: tx('berg.turm', 'Förderturm') + ': ' + liftTxt(w), bad: w === 'lager' }); }
   out.push(...zufIssues());   // 5.0: Zufriedenheit (Paket E; ersetzt die Zeile von C)
   return out;
 }
@@ -10842,6 +10927,8 @@ function lagerHtml() {
       const why = p === gs ? (p === nextGoal() ? tx('pack.ziel', 'Ziel') : tx('pack.einw', 'Ziel: Einwohner')) : tx('pack.opt', 'freiwillig, dort gestanden');
       h += `<div class="up"><div><strong>🎒 ${tx('pack.for', 'Für')} ${shortTitle(p)} ${tx('pack.hol', 'holen')}</strong><small>${why} · ${resList(hp)}${onR ? '' : ' · ' + tx('pack.ramp', 'an der Rampe am Lager')}</small></div><button class="buy" data-act="pack" data-k="${p.id}" data-free="1"${onR ? '' : ' disabled'}>${tx('pack.go', 'Holen')}</button></div>`;
     }
+    // 5.0.3: Rucksack ansehen (Zurücklegen einzelner Waren)
+    if (onR && S.stack.length) h += `<div class="up"><div><strong>🎒 ${tx('bag.title', 'Rucksack')} ${S.stack.length}/${cap()}</strong><small>${resList(bagCount())}</small></div><button class="buy" data-act="bag" data-free="1">${tx('bag.show', 'Ansehen')}</button></div>`;
   }
   h += row(tx('lag.up', 'Lager ausbauen'), tx('lag.lv', 'Stufe') + ' ' + S.lager.lv + ' · ' + tx('lag.cap', 'Platz für') + ' ' + fmt(lcap()) + (c !== undefined ? ' → ' + fmt(LCAP[S.lager.lv]) : ''), c === undefined ? null : c, 'lup', '');
   const items = Object.keys(S.lager.it).sort((a, b) => (keepN[b] || 0) - (keepN[a] || 0) || RES[b].price * S.lager.it[b] - RES[a].price * S.lager.it[a]);
@@ -10849,8 +10936,15 @@ function lagerHtml() {
   let all = 0; for (const r of items) all += sellValue(r, surplus(r));
   const ws = S.done.tier2 ? tx('lag.ws', 'Großhandel') + ' ' + Math.round(WHOLESALE * 100) + ' %' : tx('lag.full', 'bis zum Dorf voller Preis, danach Großhandel') + ' ' + Math.round(WHOLESALE * 100) + ' %';
   h += `<div class="up"><div><strong>${tx('lag.sellall', 'Überschuss verkaufen')}</strong><small>${ws} · ${tx('lag.keep', 'behält, was Ziel und Aufträge brauchen')}</small></div><button class="buy" data-act="sellall" data-free="1"${all ? '' : ' disabled'}>+${coinH}${fmt(all)}</button></div>`;
+  // 5.0.3: an der Rampe je Ware „🎒 Nehmen“ (+1, +10, Max in einer Zeile darunter)
+  const tk = rampOk(), room = cap() - S.stack.length;
+  if (!tk) takeOpen = null;
+  h += tk ? `<small class="note">🎒 ${tx('take.hint', 'Nehmen: einzelne Waren in den Rucksack')} · ${S.stack.length}/${cap()}</small>` : `<small class="note">🎒 ${tx('take.ramp', 'Waren einzeln nehmen: an der Rampe am Lager')}</small>`;
   h += '<div class="grid">';
-  for (const r of items) { const n = S.lager.it[r], sp = surplus(r), kp = keepN[r] || 0; h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(n)}${kp ? ' · ' + tx('lag.goal', 'fürs Ziel') + ' ' + fmt(Math.min(kp, n)) : ''}</span>${sp ? `<button class="buy" data-act="sell" data-k="${r}" data-free="1" aria-label="${RES[r].name} verkaufen">+${fmt(sellValue(r, sp))}</button>` : ''}</div>`; }
+  for (const r of items) { const n = S.lager.it[r], sp = surplus(r), kp = keepN[r] || 0; h += `<div class="it">${sw(r, !RAWOF[r])}<span class="nm">${RES[r].name}</span><span class="ct">${fmt(n)}${kp ? ' · ' + tx('lag.goal', 'fürs Ziel') + ' ' + fmt(Math.min(kp, n)) : ''}</span>${sp ? `<button class="buy" data-act="sell" data-k="${r}" data-free="1" aria-label="${RES[r].name} verkaufen">+${fmt(sellValue(r, sp))}</button>` : ''}${tk ? `<button class="buy sm tk" data-act="takeopen" data-k="${r}" data-free="1" aria-expanded="${takeOpen === r}">🎒 ${tx('take.go', 'Nehmen')}</button>` : ''}</div>`;
+    if (tk && takeOpen === r) { const mx = Math.min(n, room), dis = mx > 0 ? '' : ' disabled';
+      h += `<div class="take"><strong>${RES[r].name} ${tx('take.in', 'in den Rucksack')}</strong><small class="note">${room > 0 ? tx('take.room', 'Platz im Rucksack') + ': ' + room + ' · ' + tx('take.lag', 'im Lager') + ' ' + fmt(n) : tx('take.full', 'Rucksack voll · erst etwas zurücklegen')}</small><div class="tkb"><button class="buy" data-act="take" data-k="${r}" data-v="1" data-free="1"${dis}>+1</button><button class="buy" data-act="take" data-k="${r}" data-v="10" data-free="1"${dis}>+10</button><button class="buy" data-act="take" data-k="${r}" data-v="max" data-free="1"${dis}>Max ${mx > 0 ? mx : ''}</button></div></div>`; }
+  }
   h += '</div>';
   if (S.done.kran) h += `<small class="note">🏗 ${tx('lag.kranr', 'Eingeschaltet beliefert der Kran Bauplätze im Dorf (gestrichelter Kreis am Boden); sonst und weiter weg tragen Träger oder du')}</small>`;
   if (S.done.kran) h += `<div class="opt"><span>${tx('lag.kranb', 'Kran beliefert Baustellen im Dorf')}</span><button class="tog${S.kran.build ? '' : ' off'}" data-act="kbuild">${S.kran.build ? 'An' : 'Aus'}</button></div>`;
@@ -11137,10 +11231,11 @@ function proxMode() {
   // Der Logbuch-Platz liegt am Uferweg: erst nach kurzem Stehenbleiben öffnen
   if (S.done.expedition && onPadAt(XPAD, 30, 22)) { if (!xlogOn) xlogOn = T; if (T - xlogOn > 0.45) return 'xlog'; } else xlogOn = 0;
   if (S.done.hafen && onPadAt(PIERPAD, 30, 26)) return 'hafen';
+  { const tp = TPAD(); if (S.done.foerderturm && S.deep.lift && tp && onPadAt(tp)) return 'turm'; }   // 5.0.3
   { const sp = SPADS(); if (S.done.kraftwerk && onPadAt(sp.kraftwerk)) return 'strom'; if (S.done.drohnen && onPadAt(sp.drohnen)) return 'drohnen'; }
   // 5.0.1: Die Lager-Rampe öffnet nach dem Einlagern das Lager-Menü (dort „🎒 Holen“ fürs Ziel)
   // G (Spieltest B3): auch bei vollem Lager (Rest bleibt im Rucksack): dann oben „Lager voll“, Ausbauen und Verkaufen. Offen bleibt er, solange man steht
-  if (S.done.lager && S.tut >= 3 && onPadAt(LPAD) && (sheetMode === 'ramp' || ((!S.stack.length || lfree() <= 0) && T - lagLastT > 0.6))) return 'ramp';
+  if (S.done.lager && S.tut >= 3 && onPadAt(LPAD) && (sheetMode === 'ramp' || packHeld || ((!S.stack.length || lfree() <= 0) && T - lagLastT > 0.6))) return 'ramp';
   // Die Werkbank im Dorf öffnet das Dorf-Menü im Tab „Werkbank“ (5.3)
   const b = BENCHES.find(b => stOpen(b) && Math.abs(pl.x - b.x) < 46 && Math.abs(pl.y - b.y) < 46 && dist(pl, b) < 44);
   if (b) return 'bank:' + b.reg;
@@ -11153,6 +11248,8 @@ function sheetHtml(mode) {
   if (mode === 'board') return boardHtml();
   if (mode === 'hub') return hubHtml();
   if (mode === 'ramp') { hubTab = 'lager'; return lagerHtml(); }
+  if (mode === 'bag') return bagHtml();   // 5.0.3
+  if (mode === 'turm') return turmHtml();
   if (mode === 'hafen') return hafenHtml();
   if (mode === 'xlog') return logHtml(false);
   if (mode === 'strom') return stromHtml();
@@ -11164,7 +11261,9 @@ function sheetHtml(mode) {
 }
 const bankKey = () => JSON.stringify(S.up) + JSON.stringify(S.sp) + S.helpers.length + helperCap() + Object.keys(S.done).length + S.trans + S.tut + Object.keys(HTOOL).map(j => hireToolOkQuiet(j) ? 1 : 0).join('') + ['w_axt', 'w_hacke', 'w_sense', 'w_angel'].map(lhas).join();
 function sheetKeyOf(mode) {
-  if (mode === 'ramp') return 'ramp' + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + '|' + S.kran.build + '|' + packKey() + S.done.kran + S.done.tier2;
+  if (mode === 'ramp') return 'ramp' + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + '|' + S.kran.build + '|' + packKey() + S.done.kran + S.done.tier2 + takeOpen + bagKey();
+  if (mode === 'bag') return bagKey();
+  if (mode === 'turm') return JSON.stringify(S.deep.buf) + S.deep.lift + S.stack.length + cap() + (S.coins >= (LIFTCOST[S.deep.lift + 1] || 1e12)) + (lfree() > 0) + S.lager.lv + JSON.stringify(S.berg.dr);
   const live = Math.floor(T / 2);
   if (mode === 'board') return JSON.stringify(S.daily) + chestPick + orderMul('daily') + (chestPick ? S.helpers.map(c => c.lv).join() + live : '') + (S.done.hafen ? JSON.stringify(S.trade.ship) + live : '');
   if (mode === 'xlog') return logKey();
@@ -11174,7 +11273,7 @@ function sheetKeyOf(mode) {
     if (t === 'helfer') return t + JSON.stringify(S.helpers.map(h => [h.type, h.work, h.res, h.keep, h.sell, h.at, h.lv, h.fed > 0, h.build, h.to, h.wauto])) + helperCap() + jobPick + JSON.stringify(pickOpen) + moreOpen + opsOpen + Math.floor(S.smith / 50) + S.trans + S.ops.length + bergAreas().length + live;
     if (t === 'dorf') return t + tierNow() + '|' + popNow() + '|' + (S.schmuck || 0) + '|' + JSON.stringify(S.paid) + FOODS.map(lhas).join() + sohleNow() + (S.zuf ? Math.round(Number(S.zuf.v) || 0) + '|' + S.zuf.tax : '') + JSON.stringify(S.auto) + live;
     if (t === 'mehr') { const m = mehrSub; return t + m + (m === 'rang' ? rangKey() : m === 'log' ? logKey() : m === 'tech' ? JSON.stringify(S.tech) + lhas('fp') + S.done.erfinder : m === 'sammel' ? JSON.stringify(S.deep.coll) : m === 'drohnen' ? S.dro.n + '|' + (S.coins >= 1500 * (S.dro.n + 1)) + live : live + (m === 'markt' ? S.mkt.min + JSON.stringify(S.trade.bp) : '')); }
-    return t + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + '|' + S.kran.build + '|' + packKey() + S.done.kran + S.done.tier2 + (S.coins >= (LCOST[S.lager.lv - 1] || 1e12));
+    return t + JSON.stringify(S.lager) + JSON.stringify(keepN) + S.kran.sell + '|' + S.kran.build + '|' + packKey() + S.done.kran + S.done.tier2 + (S.coins >= (LCOST[S.lager.lv - 1] || 1e12)) + takeOpen + bagKey();
   }
   if (mode === 'hafen') return JSON.stringify(S.trade.ship) + Math.floor(S.trade.left) + live;
   if (mode === 'strom') return pwDem + '|' + Math.round(pwProd) + live;
@@ -11187,7 +11286,10 @@ function sheetKeyOf(mode) {
 }
 function updateSheet() {
   if (sheetMan && (state !== 'play' || Math.hypot(pl.x - sheetMan.x, pl.y - sheetMan.y) > 90)) sheetMan = null;
-  const prox = proxMode();
+  // 5.0.3 (Spieltest): Gebäude öffnen nur auf Antippen. proxMode sagt, was hier offen sein könnte (nearMode, Knopf „👆 … öffnen“); offen ist es erst nach dem Tippen (tapOpen)
+  const near = proxMode(); nearMode = near;
+  if (tapOpen && near !== tapOpen) tapOpen = null;
+  const prox = near && near === tapOpen ? near : null;
   if (sheetSup && prox !== sheetSup) sheetSup = null;
   const mode = sheetMan ? sheetMan.mode : prox && prox !== sheetSup ? prox : null;
   if (!mode) { if (sheetMode) { sheet.hidden = true; sheetMode = null; sheetKey = ''; sheetH = 0; pickOpen = null; } return; }
@@ -11285,7 +11387,13 @@ function actUi(act, k, i, v) {
   else if (act === 'tab') { if (!setTab(k)) return false; pickOpen = null; moreOpen = -1; if (k === 'mehr') mehrSub = null; if (sheetMode !== 'hub') openHub(); if (TAB_OLD[k] === 'mehr:rang' && rangApp() && (RANG.on || SET.rangAsk) && !rangLoad && (!rangData || Date.now() - rangAt > 30000)) rangFetch(); }
   else if (act === 'rang') { save(true); sfx('tap'); showRang('play'); return true; }
   else if (act === 'rangref') { rangFetch(); sfx('tap'); return true; }
-  else if (act === 'close') { sheetSup = sheetMan ? null : sheetMode; sheetMan = null; }
+  else if (act === 'close') { if (!sheetMan) tapOpen = null; sheetSup = null; sheetMan = null; }
+  // 5.0.3: Waren einzeln nehmen und zurücklegen, Rucksack-Bogen
+  else if (act === 'takeopen') { if (!rampOk() || !lhas(k)) return false; takeOpen = takeOpen === k ? null : k; sheetKey = ''; updateSheet(); try { const e = sheet.querySelector('.take'); if (e) e.scrollIntoView({ block: 'nearest' }); } catch (er) {} sfx('tap'); return true; }
+  else if (act === 'take') { if (!takeGo(k, v)) return false; }
+  else if (act === 'putback') { if (!putBack(k)) return false; }
+  else if (act === 'turmtake') { if (!turmTake(k, v)) return false; }
+  else if (act === 'bag') { if (state !== 'play') return false; if (sheetMode === 'bag' && sheetMan) sheetMan = null; else sheetMan = { mode: 'bag', x: pl.x, y: pl.y }; sheetKey = ''; updateSheet(); sfx('tap'); return true; }
   else return undefined;
   return 'ok';
 }
@@ -11339,6 +11447,67 @@ optTogEl.addEventListener('click', () => {
   optTogK = ''; updateOptTog();
 });
 
+// 5.0.3 (Spieltest „Gebäude nur öffnen, wenn man das anklickt“): in der Nähe erscheint „👆 … öffnen“; Tippen darauf, aufs Gebäude oder E/Enter öffnet den Bogen
+const openBtnEl = $('openBtn'); let tapOpen = null, nearMode = null, openK = '';
+function nearName(m) {
+  if (!m) return '';
+  if (m === 'ramp') return tx('tab.lager', 'Lager');
+  if (m === 'board') return tx('open.board', 'Auftragsbrett');
+  if (m === 'hafen') return tx('open.hafen', 'Hafen');
+  if (m === 'xlog') return tx('open.xlog', 'Logbuch');
+  if (m === 'strom') return tx('open.strom', 'Kraftwerk');
+  if (m === 'drohnen') return tx('open.drohnen', 'Drohnen');
+  if (m === 'deep') return tx('open.korb', 'Förderkorb');
+  if (m === 'turm') return tx('berg.turm', 'Förderturm');
+  const [a, b] = m.split(':');
+  if (a === 'bank') return tx('open.bank', 'Werkbank');
+  if (a === 'mach') return BLD[b] ? BLD[b].name : '';
+  if (a === 'harv') return HARV[b] ? HARV[b].name : '';
+  return '';
+}
+function nearPos(m) {
+  if (!m) return null;
+  if (m === 'ramp') return LAGER;
+  if (m === 'board') return BOARD;
+  const [a, b] = m.split(':');
+  if (a === 'bank') return BENCHES.find(x => x.reg === b) || null;
+  if ((a === 'mach' || a === 'harv') && PL[b]) return PL[b];
+  if (m === 'deep' && deep) return deep.korb;
+  if (m === 'turm') return PL.foerderturm || null;
+  return null;
+}
+function openNear() {
+  if (state !== 'play' || !nearMode || tapOpen === nearMode) return false;
+  tapOpen = nearMode; sheetMan = null; sheetSup = null; sheetKey = ''; updateSheet(); sfx('tap'); updateOpenBtn(); return true;
+}
+function updateOpenBtn() {
+  const m = state === 'play' && !fade && nearMode && tapOpen !== nearMode && !(sheetMode && !sheet.hidden) ? nearMode : null;
+  if (!m) { if (!openBtnEl.hidden) { openBtnEl.hidden = true; openK = ''; } return; }
+  if (openK !== m) { openK = m; const nm = nearName(m); openBtnEl.textContent = '👆 ' + (nm ? nm + ' ' : '') + tx('open.go', 'öffnen'); openBtnEl.setAttribute('aria-label', (nm ? nm + ' ' : '') + tx('open.go', 'öffnen')); openBtnEl.hidden = false; }
+  // unter der Spielfigur (über Schildern und Meldungen liegen die Texte darüber)
+  const w = openBtnEl.offsetWidth || 180, sx = clamp((pl.x - camX) * Z + cw / 2 - w / 2, 16, Math.max(16, cw - 16 - w)), sy = clamp((pl.y + 34 - camY) * Z + ch / 2, goalBot + 8, ch - 130);
+  openBtnEl.style.left = Math.round(sx) + 'px'; openBtnEl.style.top = Math.round(sy) + 'px';
+}
+openBtnEl.addEventListener('click', () => openNear());
+// Antippen in der Welt (kein Wischen: kurz und kaum bewegt) auf das Gebäude oder die Spielfigur öffnet; der Joystick öffnet nichts
+let tapD = null;
+cv.addEventListener('pointerdown', e => { tapD = { x: e.clientX, y: e.clientY, t: performance.now(), id: e.pointerId, far: false }; });
+cv.addEventListener('pointermove', e => { if (tapD && e.pointerId === tapD.id && Math.hypot(e.clientX - tapD.x, e.clientY - tapD.y) > 10) tapD.far = true; });
+cv.addEventListener('pointerup', e => {
+  const d = tapD; tapD = null;
+  if (!d || d.id !== e.pointerId || d.far || performance.now() - d.t > 350 || state !== 'play' || !nearMode || tapOpen === nearMode) return;
+  const r = cv.getBoundingClientRect(), wx = (e.clientX - r.left - cw / 2) / Z + camX, wy = (e.clientY - r.top - ch / 2) / Z + camY, bp = nearPos(nearMode);
+  if (Math.hypot(wx - pl.x, wy - (pl.y - 20)) <= 90 || (bp && Math.hypot(wx - bp.x, wy - bp.y) <= 110)) openNear();
+});
+cv.addEventListener('pointercancel', () => { tapD = null; });
+window.addEventListener('keydown', e => {
+  if ((e.code !== 'KeyE' && e.code !== 'Enter' && e.code !== 'NumpadEnter') || e.repeat || state !== 'play') return;
+  const t = e.target; if (t && t.closest && (t.closest('input,textarea,select') || (e.code !== 'KeyE' && t.closest('button,a')))) return;   // Enter auf einem Knopf drückt den Knopf
+  if (tapOpen && tapOpen === nearMode && sheetMode === tapOpen) { tapOpen = null; sheetKey = ''; updateSheet(); return; }
+  openNear();
+});
+bagEl.addEventListener('click', () => doAct('bag'));
+
 // ---------- Schleife ----------
 let last = performance.now(), saveT = 0, hudT = 0;
 // 6.4: Portal-Adapter. Spielzeit läuft nur im Spiel, ohne offene Karte und ohne offenes Dorf-Menü (Bögen mit Menüs); sonst gameplayStop
@@ -11376,7 +11545,7 @@ function loop(now) {
   try { update(dt); } catch (e) { if (loopErr++ < 3) console.warn('update', e); }
   try { draw(); } catch (e) { if (loopErr++ < 3) console.warn('draw', e); try { ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; } catch (e2) {} }
   if (state === 'play') {
-    try { if ((hudT -= dt) <= 0) { hudT = 0.1; updateHud(); updateSheet(); updateBlast(); updateClock(); toastPos(); } updateOptTog(); } catch (e) { if (loopErr++ < 3) console.warn('hud', e); }
+    try { if ((hudT -= dt) <= 0) { hudT = 0.1; updateHud(); updateSheet(); updateBlast(); updateClock(); toastPos(); } updateOptTog(); updateOpenBtn(); } catch (e) { if (loopErr++ < 3) console.warn('hud', e); }
   }
   try { audioTick(dt); } catch (e) { if (loopErr++ < 3) console.warn('audio', e); }
   try { portalSync(); } catch (e) {}
@@ -11525,7 +11694,7 @@ function xferWire() {
 
 // ---------- Karten: Menü, Einstellungen, Willkommen ----------
 let returnTo = 'menu';
-function showCard(html) { ov.hidden = false; hud.hidden = true; blastEl.hidden = true; optTogEl.hidden = true; optTogK = ''; sheet.hidden = true; sheetMode = null; sheetKey = ''; inp.id = null; card.innerHTML = html; ov.scrollTop = 0; portalSync(); }
+function showCard(html) { ov.hidden = false; hud.hidden = true; blastEl.hidden = true; optTogEl.hidden = true; optTogK = ''; openBtnEl.hidden = true; openK = ''; tapOpen = null; sheet.hidden = true; sheetMode = null; sheetKey = ''; inp.id = null; card.innerHTML = html; ov.scrollTop = 0; portalSync(); }
 function start() {
   initAudio();
   try { navigator.wakeLock && navigator.wakeLock.request('screen').catch(() => {}); } catch (e) {}
@@ -11827,6 +11996,10 @@ function showPaused() {
   $('menu').onclick = showMenu;
 }
 const NEWS = [
+  tx('news.503a', '5.0.3: Gebäude öffnen nur noch, wenn du sie antippst: in der Nähe erscheint „👆 … öffnen“ (am Computer auch E oder Enter). Einlagern, Maschinen füllen und Bauplätze bezahlen geht weiter von allein'),
+  tx('news.503b', '5.0.3: Im Lager an der Rampe nimmst du einzelne Waren: „🎒 Nehmen“ mit +1, +10 oder Max. Tippe auf 🎒 oben, um den Rucksack zu sehen und Waren zurückzulegen'),
+  tx('news.503c', '5.0.3: Helfer laufen ruhiger (etwa ein Fünftel langsamer)'),
+  tx('news.503d', '5.0.3: Förderturm: zeigt, warum er voll ist, und lässt sich antippen. Dort baust du ihn aus oder nimmst das Erz selbst mit'),
   tx('news.502a', '5.0.2: Der Pfeil führt durch die ganze Kette: vom Rohstoff über die Maschine bis zum Bauplatz, auch ins Bergwerk'),
   tx('news.502b', '5.0.2: „🎒 Holen“ an der Lager-Rampe packt für das Ziel ein oder für den Bauplatz, auf dem du zuletzt gestanden hast'),
   tx('news.502c', '5.0.2: Wohnhäuser und andere freiwillige Bauten bauen Helfer nur noch, wenn du am Platz „🤝 Helfer bauen das“ einschaltest'),
