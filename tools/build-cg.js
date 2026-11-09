@@ -128,3 +128,20 @@ const sz = f => fs.statSync(path.join(OUT, f)).size, total = files.reduce((a, f)
 const kb = n => (n / 1024).toFixed(0) + ' KB';
 console.log(`CG-Build: ${OUT} · Version ${gameVer}-${hash} · ${files.length} Dateien · ${kb(total)} (index.html ${kb(sz('index.html'))}, game.js ${kb(sz('game.js'))})`);
 console.log(`ZIP: ${zipPath} · ${kb(fs.statSync(zipPath).size)}`);
+
+// Einzeldatei für den Upload (das Portal nimmt keine ZIPs und keine Ordner): Schriften und Spiel stecken in einer index.html.
+// Liegt in <repo>/crazygames/index.html, wenn das Skript im Repo läuft (Download-Link für den Besitzer).
+{
+  const one = process.argv[5] || path.join(ZIPDIR, 'crazygames-einzeldatei');
+  let h = fs.readFileSync(path.join(OUT, 'index.html'), 'utf8'), g = fs.readFileSync(path.join(OUT, 'game.js'), 'utf8');
+  const css = fs.readFileSync(path.join(OUT, 'fonts.css'), 'utf8').replace(/url\((fonts\/[^)]+)\)/g, (m, f) => 'url(data:font/woff2;base64,' + fs.readFileSync(path.join(OUT, f)).toString('base64') + ')');
+  const link = '<link rel="stylesheet" href="fonts.css">', sdk = '<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>';
+  const load = /s\.src = 'game\.js\?v=[^']*';/;
+  if (!h.includes(link) || !h.includes(sdk) || !load.test(h) || g.includes('</script')) throw new Error('Einzeldatei: Anker nicht gefunden');
+  h = h.split(link).join('<style>\n' + css + '\n</style>');
+  h = h.replace(load, () => "s.textContent = document.getElementById('sfl-game').textContent;");
+  const i = h.indexOf(sdk);
+  h = h.slice(0, i) + '<script type="text/plain" id="sfl-game">' + g + '</script>\n' + h.slice(i);
+  fs.mkdirSync(one, { recursive: true }); fs.writeFileSync(path.join(one, 'index.html'), h);
+  console.log(`Einzeldatei: ${path.join(one, 'index.html')} · ${kb(Buffer.byteLength(h))}`);
+}
