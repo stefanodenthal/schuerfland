@@ -334,12 +334,21 @@ details.how2{width:100%}details.how2 .how{margin-top:6px}
 .card.first{gap:14px}
 .icrow{display:flex;gap:10px;justify-content:center}.icrow .ghost{min-width:52px;justify-content:center;font-size:20px}
 .kh{display:inline-block;min-width:1.3em;padding:0 .3em;margin-left:.35em;border-radius:5px;background:rgba(35,48,31,.12);font-family:var(--f-body);font-size:.72em;font-weight:900;line-height:1.5;vertical-align:.12em}
+/* 5.1.1 (H511): 🏆-Knopf im HUD neben dem Zahnrad (öffnet die Rangliste, zeigt den eigenen Platz). Im Portal (PORTAL.noRang) bleibt er versteckt */
+#rangBtn{pointer-events:auto;position:relative;flex:none;width:44px;height:44px;border-radius:50%;padding:0;background:rgba(255,248,232,.94);color:var(--ink);box-shadow:0 3px 0 rgba(35,48,31,.25);display:flex;align-items:center;justify-content:center;font-family:var(--f-body);font-size:21px;line-height:1}
+#rangBtn .rk{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);min-width:20px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:var(--gold);color:var(--ink);font-style:normal;font-size:12px;font-weight:900;line-height:16px;text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums;box-shadow:0 0 0 2px #fff8e8}
+#lagerBtn[hidden]+#rangBtn{margin-left:auto}
+@media (max-width:400px){#hud.rk .row{gap:4px}#hud.rk .chip{padding-left:6px;padding-right:6px;font-size:14px}#hud.rk .coin{margin-right:.2em}}
+@media (max-width:380px){#hud.rk .row{gap:3px}#hud.rk .chip{padding-left:5px;padding-right:5px;font-size:13.5px}}
+@media (max-width:350px){#hud.rk .row{gap:3px}#hud.rk .chip{padding-left:4px;padding-right:4px;font-size:13px}#hud.rk .coin{margin-right:.12em}}
+.rjoin{width:100%;font-size:19px;padding:10px 14px}
 /* Breite Querformat-Bildschirme (Desktop, ab 900 × 500 px; Handys quer bleiben wie bisher): HUD, Ziel-Kasten und Knöpfe wachsen mit --ui (JS: resize), Bögen als Seitenleiste rechts */
 @media (min-width:900px) and (min-height:500px) and (orientation:landscape){
   #hud{gap:calc(8px*var(--ui))}
   #hud .row{gap:calc(8px*var(--ui))}
   .chip{font-size:calc(16px*var(--ui));padding:calc(5px*var(--ui)) calc(12px*var(--ui))}
   #gear{width:calc(44px*var(--ui));height:calc(44px*var(--ui))}#gear svg{width:calc(22px*var(--ui));height:calc(22px*var(--ui))}
+  #rangBtn{width:calc(44px*var(--ui));height:calc(44px*var(--ui));font-size:calc(21px*var(--ui))}#rangBtn .rk{font-size:calc(12px*var(--ui));line-height:calc(16px*var(--ui));bottom:calc(-7px*var(--ui));min-width:calc(20px*var(--ui))}
   #goal{font-size:calc(14px*var(--ui));padding:calc(6px*var(--ui)) calc(14px*var(--ui));border-radius:calc(12px*var(--ui));max-width:min(100%,calc(560px*var(--ui)))}
   #goal .gw{font-size:calc(13.5px*var(--ui))}#goal .gw img{width:calc(20px*var(--ui));height:calc(19px*var(--ui))}
   #goal small{font-size:calc(13px*var(--ui))}
@@ -359,9 +368,9 @@ const $ = id => document.getElementById(id);
 const cv = $('cv'), ctx = cv.getContext('2d');
 const blastEl = $('blast');
 const clockEl = $('clock'), clockTxt = $('clockTxt');
-const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
+const hud = $('hud'), coinsEl = $('coins'), bagEl = $('bag'), lagerEl = $('lagerBtn'), rangEl = $('rangBtn'), goalEl = $('goal'), savedEl = $('saved'), gearEl = $('gear'), sheet = $('sheet'), ov = $('ov'), card = $('card');
 const FONT = '"Lilita One","Arial Black",system-ui,sans-serif';
-const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.1.0', SAVE_V = 5.0;
+const HOME_KEY = 'schuerfland-save', MKEY = 'schuerfland-meta', SKEY = 'schuerfland-settings', VERSION = '5.1.1', SAVE_V = 5.0;
 const toastEl = $('toast');
 // App-Hülle (installierbare Version auf eigener Domain): setzt window.SFL_APP = { version, standalone: true, onReady? }
 const APP = (() => { try { const a = window.SFL_APP; return a && typeof a === 'object' ? a : null; } catch (e) { return null; } })();
@@ -920,6 +929,8 @@ Object.assign(EN, {
   'news.51d': '5.1: On a computer: click to walk, P = pause, Tab or M = village menu, 1–5 = tabs. Larger display on wide screens',
   'card.m.play': 'Play', 'card.m.walk3': 'Click, drag with the mouse, or use WASD or the arrow keys.',
   'ctl.drag': 'Drag', 'ctl.click': 'Click',
+  // 5.1.1 (H511): Rangliste schneller erreichbar
+  'news.511a': '5.1.1: 🏆 Leaderboard now right at the top of the screen, next to the gear. If you take part, it shows your place',
 });
 // ---------- (Ende EN: Paket D) ----------
 // 5.1 (P0): Texte im statischen HTML (oben, ohne tx) einmal setzen. Inhalt: Paket C (Schlüssel ui.html.*)
@@ -11583,13 +11594,17 @@ function updateHud(force) {
   const gi = goalInfo(); goalTgt = gi.tgt;
   if (T - issueT > 1) { issueT = T; issueBad = issues().some(i => i.bad); }
   const wx = wxIcon(), dot = hudDot(), coinOn = S.tut >= 3;
-  const key = [S.coins, S.stack.length, cap(), gi.html, gi.goods || '', wx, S.done.lager, dot, saveFail, coinOn].join('|');
+  const rk = !PORTAL.noRang && RANG.on && !RANG.del && RANG.rang ? RANG.rang : 0;   // 5.1.1: bekannter Platz (aus der letzten Meldung oder Liste), keine eigene Anfrage
+  const key = [S.coins, S.stack.length, cap(), gi.html, gi.goods || '', wx, S.done.lager, dot, saveFail, coinOn, rk].join('|');
   if (saveFail !== savedEl.classList.contains('fail')) { savedEl.classList.toggle('fail', saveFail); savedEl.innerHTML = saveFail ? '⚠<span class="svt"> ' + tx('hud.savefail', 'Speichern fehlgeschlagen') + '</span>' : ''; }
   if (key === lastHud && !force) return; lastHud = key;
   coinsEl.innerHTML = '<span class="coin"></span>' + fmt(S.coins); coinsEl.classList.toggle('off', !coinOn);   // 6.1: Münzen-Chip erst nach Schritt 3 (Platz bleibt, damit Münzen hinfliegen)
   bagEl.textContent = '🎒 ' + S.stack.length + '/' + cap();
   bagEl.classList.toggle('full', S.stack.length >= cap());
   lagerEl.hidden = !S.done.lager;
+  rangEl.hidden = PORTAL.noRang || !S.done.lager;   // 5.1.1 (H511): 🏆 neben dem Zahnrad, sobald es das Dorf-Menü gibt; im Portal nie
+  hud.classList.toggle('rk', !rangEl.hidden);   // schmale Handys: Chips etwas enger, damit der Knopf in die Zeile passt
+  if (!rangEl.hidden) { rangEl.innerHTML = '🏆' + (rk ? `<i class="rk">${fmt(rk)}</i>` : ''); rangEl.setAttribute('aria-label', tx('m.rang', 'Rangliste') + (rk ? ', ' + tx('m.platz', 'Platz {n}', { n: fmt(rk) }) : '')); }
   lagerEl.innerHTML = '☰ ' + tx('hud.dorf', 'Dorf') + '<span class="kh dk" aria-hidden="true">M</span>' + (dot ? '<i class="dot"></i>' : '');   // 5.1 (F): Tasten-Hinweis nur am Computer
   lagerEl.setAttribute('aria-label', tx('hud.menu', 'Dorf-Menü') + (issueBad ? ', ' + tx('hud.problem', 'es gibt ein Problem') : dot ? ', ' + tx('hud.newd', 'neue Tagesaufträge') : ''));
   goalEl.innerHTML = gi.title !== undefined ? `<span class="gt">${gi.title}</span>${gi.goods ? `<span class="gw">${gi.goods}</span>` : ''}${gi.tip ? `<small>${gi.tip}</small>` : ''}${wx}` : gi.html + wx;
@@ -12714,8 +12729,9 @@ function showRang(from, view) {
   }
   showCard(`<div class="hd rhd"><h2>🏆 ${tx('card.m.rang', 'Rangliste')}</h2><button class="x" id="rn-ref" aria-label="${tx('card.r.ref', 'Aktualisieren')}">↻</button></div>
     <p class="small" id="rn-st">${rangStatus()}</p>
+    ${!RANG.on && !RANG.del ? `<button class="buy rjoin" id="rn-in">🏆 ${tx('card.r.in', 'Mitmachen')}</button>` : ''}
     <div id="rn-list" class="rwrap">${rangListHtml(50)}</div>
-    <div class="rbtn">${RANG.on ? `<button class="ghost" id="rn-edit">${tx('card.r.rename', 'Name ändern')}</button><button class="danger" id="rn-out">${tx('card.r.quit', 'Nicht mehr teilnehmen')}</button>` : RANG.del ? '' : `<button class="ghost" id="rn-in">${tx('card.r.in', 'Mitmachen')}</button>`}</div>
+    ${RANG.on ? `<div class="rbtn"><button class="ghost" id="rn-edit">${tx('card.r.rename', 'Name ändern')}</button><button class="danger" id="rn-out">${tx('card.r.quit', 'Nicht mehr teilnehmen')}</button></div>` : ''}
     <details class="news"><summary>${tx('card.r.how', 'So zählen die Punkte ▾')}</summary><ul>${PUNKTE_TXT.map(t => `<li>${t}</li>`).join('')}</ul></details>
     <div class="stickbar"><button class="big" id="back">${from === 'play' ? tx('card.p.go', 'Weiter') : tx('card.back', 'Zurück')}</button></div>`);
   $('back').onclick = rangBack;
@@ -12728,7 +12744,19 @@ function showRang(from, view) {
     out.disabled = true; out.textContent = tx('card.r.deling', 'Wird gelöscht …');
     rangDelete().then(ok => { rangNote = ok ? tx('card.r.deld', 'Dein Eintrag ist gelöscht. Du machst nicht mehr mit.') : tx('card.r.delnet', 'Keine Verbindung: die Abmeldung wird nachgeholt.'); rangNoteT = Date.now(); if (state === 'rang') showRang(from, 'list'); });
   };
+  rangShowMe();
   if (!rangLoad && (!rangData || Date.now() - rangAt > 15000)) rangFetch();
+}
+// 5.1.1 (H511): die eigene Zeile gleich sichtbar machen (einmal je Öffnen; über der festen Fußleiste mit „Weiter“)
+function rangShowMe() {
+  try {
+    if (!rangView || rangView.seen || !RANG.on) return;
+    const m = card.querySelector('.rlist .rrow.me'); if (!m) return;
+    rangView.seen = true;
+    const o = ov.getBoundingClientRect(), r = m.getBoundingClientRect(), bar = card.querySelector('.stickbar'), bh = bar ? bar.getBoundingClientRect().height : 0;
+    if (r.top >= o.top && r.bottom <= o.bottom - bh - 8) return;   // schon zu sehen
+    ov.scrollTop += r.top - o.top - Math.max(0, (o.height - bh - r.height) / 2);
+  } catch (e) {}
 }
 function rangBack() { rangView = null; sfx('ui'); if (returnTo === 'play') start(); else showMenu(); }
 // Nur die Liste neu zeichnen (die Eingabefelder der Namenskarte bleiben unberührt)
@@ -12737,7 +12765,7 @@ function rangRefreshView() {
     if (state === 'play' && sheetMode === 'hub' && hubTab === 'rang') { sheetKey = ''; updateSheet(); }
     if (state !== 'rang' || !rangView || rangView.view !== 'list') return;
     const l = $('rn-list'), st = $('rn-st'), rf = $('rn-ref');
-    if (l) l.innerHTML = rangListHtml(50);
+    if (l) { l.innerHTML = rangListHtml(50); rangShowMe(); }
     if (st) st.innerHTML = rangStatus();
     if (rf) rf.classList.toggle('spin', rangLoad);
   } catch (e) {}
@@ -12812,6 +12840,7 @@ const NEWS51 = !/^5\.0\./.test(VERSION);
 const NTOP = () => NEWS51 && (window.innerHeight || 0) >= 640 ? 4 : 3;   // Neu-Karte: so viele Zeilen oben offen (5.1: alle vier 5.1-Punkte, auch die Computer-Tasten; auf sehr niedrigen Schirmen 3, damit „Weiter“ sichtbar bleibt)
 const NEWS = [
   ...(NEWS51 ? [
+  ...(PORTAL.noRang ? [] : [tx('news.511a', '5.1.1: 🏆 Rangliste jetzt direkt oben im Bild, neben dem Zahnrad. Wenn du mitmachst, steht dort dein Platz')]),
   tx('news.51a', '5.1: Schürfland gibt es jetzt auch auf Englisch. Die Sprache stellst du in den Einstellungen um'),
   tx('news.51b', '5.1: Gebäude öffnest du durch Antippen (👆, am Computer auch E oder Enter). An der Rampe nimmst du einzelne Waren, 🎒 oben zeigt den Rucksack'),
   tx('news.51c', '5.1: Der Förderturm zeigt, warum er voll ist, Helfer laufen ruhiger, und viele kleine Texte sind klarer'),
@@ -13030,6 +13059,7 @@ function showSettings(from) {
   $('back').onclick = () => { if (returnTo === 'play') start(); else showMenu(); };
 }
 gearEl.onclick = () => { if (state === 'play') { save(true); showSettings('play'); } };
+rangEl.onclick = () => { if (state === 'play' && !PORTAL.noRang) { save(true); sfx('tap'); showRang('play'); } };   // 5.1.1: ein Tipp zur Rangliste
 function dur(sec) { const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60); return h ? tx('card.dur.hm', '{h} Std {m} Min', { h, m }) : tx('card.dur.m', '{m} Min', { m: Math.max(1, m) }); }
 function showWelcome(r) {
   state = 'welcome';
@@ -13091,7 +13121,7 @@ if (APP && typeof APP.onReady === 'function') { try { APP.onReady({ version: VER
 <div id="game">
   <canvas id="cv"></canvas>
   <div id="hud" hidden>
-    <div class="row"><div class="chip" id="coins"><span class="coin"></span>0</div><button class="chip" id="bag" aria-label="Rucksack ansehen">🎒 0/20</button><div id="saved" role="status" aria-label="Speichern fehlgeschlagen"></div><button class="chip" id="lagerBtn" hidden aria-label="Dorf-Menü">☰ Dorf</button>
+    <div class="row"><div class="chip" id="coins"><span class="coin"></span>0</div><button class="chip" id="bag" aria-label="Rucksack ansehen">🎒 0/20</button><div id="saved" role="status" aria-label="Speichern fehlgeschlagen"></div><button class="chip" id="lagerBtn" hidden aria-label="Dorf-Menü">☰ Dorf</button><button id="rangBtn" hidden>🏆</button>
       <button id="gear" aria-label="Pause und Einstellungen"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="4.5" stroke-dasharray="3.1 3.2"/><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2.8"/></svg></button></div>
     <div id="goal"></div>
     <button id="clock" hidden aria-hidden="true" tabindex="-1"><span id="clockTxt"></span></button>
