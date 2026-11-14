@@ -1,0 +1,17 @@
+{
+  "name": "Düsenduell",
+  "short_name": "Düsenduell",
+  "lang": "de",
+  "description": "Zwei Jets, ein Handy: lokales Zweispieler-Gefecht in den Wolken.",
+  "start_url": "./",
+  "scope": "./",
+  "id": "./",
+  "display": "standalone",
+  "background_color": "#06182e",
+  "theme_color": "#06182e",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

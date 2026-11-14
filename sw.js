@@ -29,6 +29,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  // Eigene Unterseite "Düsenduell" (/duell/): nicht anfassen, direkt ins Netz bzw. zum eigenen Service Worker
+  if (url.pathname.startsWith(new URL('./duell', self.registration.scope).pathname)) return;
   if (req.mode === 'navigate') {
     e.respondWith(
       withTimeout(fetch(req), 4000)
