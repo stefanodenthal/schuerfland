@@ -102,6 +102,26 @@ button{font:inherit;color:inherit;touch-action:none}
 .flash{position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(circle,rgba(255,60,40,0) 40%,rgba(255,60,40,.55) 100%);opacity:0}
 .flash.f{animation:fl .28s ease-out}
 @keyframes fl{0%{opacity:1}100%{opacity:0}}
+/* Tastatur-Hinweise nur mit Maus (Touch bleibt unverändert) */
+.kh,#menu .keys{display:none}
+@media (hover:hover) and (pointer:fine){
+ .kh{display:block;font:800 11px/1 system-ui;letter-spacing:.04em;opacity:.8;margin-top:2px;padding:2px 6px;border-radius:5px;background:rgba(0,0,0,.28);pointer-events:none;white-space:nowrap}
+ .pad div{flex-direction:column;gap:6px}
+ .btn{cursor:pointer}.pad{cursor:pointer}
+ #menu .keys{display:block;font-size:12.5px;background:rgba(0,0,0,.22);border-radius:14px;padding:9px 12px;line-height:1.5}
+ #menu .keys b{display:block;margin-bottom:3px;opacity:.9}
+ #menu .kr{display:flex;gap:10px}#menu .kr .c1{min-width:92px;font-weight:800;color:#a6d6ff}#menu .kr .c1.o{color:#ffbb66}
+ #menu .kp{display:flex;gap:10px;margin:2px 0 4px;opacity:.85}#menu .kp .c2{min-width:22px;font-weight:900;color:#a6d6ff}#menu .kp .c2.o{color:#ffbb66}
+ #menu .how{display:none}
+}
+@media (orientation:landscape) and (hover:hover) and (pointer:fine) and (min-width:900px){
+ .side{width:clamp(180px,15vw,250px)}
+ .hud{height:34px}.pips i{width:13px;height:13px}.bar{height:14px}
+ #menu .in{max-width:880px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:30px;row-gap:9px;align-content:center}
+ #menu .in>*{grid-column:1}#menu .in>.keys{grid-column:2;grid-row:1/9;align-self:center;font-size:14px;padding:14px 16px}
+ #menu #logo{display:block;max-width:300px}
+ #menu h1{font-size:44px}
+}
 </style>
 </head>
 <body>
@@ -130,6 +150,10 @@ button{font:inherit;color:inherit;touch-action:none}
       <button data-s="lang" style="grid-column:1/-1"></button>
     </div>
     <div class="how" data-i="how"></div>
+    <div class="keys"><b data-i="kt"></b><div class="kp"><span class="c2">P1</span><span data-i="k_p1"></span></div>
+     <div class="kr"><span class="c1">A D</span><span data-i="k_steer"></span></div><div class="kr"><span class="c1">W / Space</span><span data-i="k_fire"></span></div><div class="kr"><span class="c1">S / Shift</span><span data-i="k_miss"></span></div><div class="kr"><span class="c1">Q</span><span data-i="k_roll"></span></div>
+     <div class="kp"><span class="c2 o">P2</span><span data-i="k_p2"></span></div>
+     <div class="kr"><span class="c1 o">&larr; &rarr;</span><span data-i="k_steer"></span></div><div class="kr"><span class="c1 o">&uarr; / Enter</span><span data-i="k_fire"></span></div><div class="kr"><span class="c1 o">&darr;</span><span data-i="k_miss"></span></div><div class="kr"><span class="c1 o">Right Shift</span><span data-i="k_roll"></span></div><div class="kp"><span class="c2">P</span><span data-i="k_pause"></span></div></div>
   </div>
 </div>
 <script>
@@ -150,18 +174,22 @@ var TXT = {
   rounds: 'Bestes aus {n}', isl: 'Inseln und Berge: {v}', mute: 'Ton: {v}', shake: 'Wackeln: {v}', vib: 'Vibration: {v}', lang: 'Sprache: Deutsch (tippen für English)', on: 'an', off: 'aus',
   fire: 'FEUER', miss: 'RAKETE', roll: 'ROLLE', heat: 'HITZE', over: 'ÜBERHITZT', ai: 'KI',
   go: 'LOS!', round: 'Runde {n}', pause: 'Pause', resume: 'Weiter', restart: 'Neustart', menu: 'Menü', snd: 'Ton',
-  rwin: 'Punkt!', rlose: 'Runde verloren', rdraw: 'Unentschieden', win: 'SIEG!', lose: 'Niederlage', rematch: 'Revanche', first: 'Wer zuerst {n} Runden gewinnt' },
+  rwin: 'Punkt!', rlose: 'Runde verloren', rdraw: 'Unentschieden', win: 'SIEG!', lose: 'Niederlage', rematch: 'Revanche', kt: 'Tastatur (am Rechner)', k_steer: 'lenken', k_fire: 'Feuer', k_miss: 'Rakete', k_roll: 'Rolle', k_p1: 'Spieler 1 (blau, links/unten)', k_p2: 'Spieler 2 (orange, rechts/oben)', k_pause: 'Pause', first: 'Wer zuerst {n} Runden gewinnt' },
  en: { tag: 'Two pilots, one phone.', play2: '2 Players', train: 'Practice (vs AI)',
   how: 'Lay the phone between you. Blue plays at the bottom, orange at the top. Steer, hold fire, missile or roll (flares). The cannon overheats!',
   rounds: 'Best of {n}', isl: 'Islands and mountains: {v}', mute: 'Sound: {v}', shake: 'Screen shake: {v}', vib: 'Vibration: {v}', lang: 'Language: English (tap for Deutsch)', on: 'on', off: 'off',
   fire: 'FIRE', miss: 'MISSILE', roll: 'ROLL', heat: 'HEAT', over: 'OVERHEAT', ai: 'AI',
   go: 'GO!', round: 'Round {n}', pause: 'Paused', resume: 'Resume', restart: 'Restart', menu: 'Menu', snd: 'Sound',
-  rwin: 'Point!', rlose: 'Round lost', rdraw: 'Draw', win: 'VICTORY!', lose: 'Defeat', rematch: 'Rematch', first: 'First to {n} rounds wins' }
+  rwin: 'Point!', rlose: 'Round lost', rdraw: 'Draw', win: 'VICTORY!', lose: 'Defeat', rematch: 'Rematch', kt: 'Keyboard (desktop)', k_steer: 'steer', k_fire: 'fire', k_miss: 'missile', k_roll: 'roll', k_p1: 'Player 1 (blue, left/bottom)', k_p2: 'Player 2 (orange, right/top)', k_pause: 'pause', first: 'First to {n} rounds wins' }
 };
-var S = { lang: ((navigator.language || navigator.userLanguage || 'en') + '').toLowerCase().indexOf('de') === 0 ? 'de' : 'en', mute: false, shake: true, vib: true, isl: true, rounds: 3 };
+var S = { lang: ((window.DUEL_LOCALE || navigator.language || navigator.userLanguage || 'en') + '').toLowerCase().indexOf('de') === 0 ? 'de' : 'en', mute: false, shake: true, vib: true, isl: true, rounds: 3 };
 try { var sv = JSON.parse(localStorage.getItem('duell-v1') || '{}'); if (sv.lang === 'de' || sv.lang === 'en') S.lang = sv.lang; if (typeof sv.mute === 'boolean') S.mute = sv.mute; if (typeof sv.shake === 'boolean') S.shake = sv.shake; if (typeof sv.vib === 'boolean') S.vib = sv.vib; if (typeof sv.isl === 'boolean') S.isl = sv.isl; if (sv.rounds === 5) S.rounds = 5; } catch (e) {}
 function saveS() { try { localStorage.setItem('duell-v1', JSON.stringify(S)); } catch (e) {} }
 function t(k, o) { var s = (TXT[S.lang] || TXT.en)[k]; if (s === undefined) s = TXT.en[k]; if (s === undefined) return k; if (o) for (var x in o) s = s.replace('{' + x + '}', o[x]); return s; }
+function muted() { return !!(S.mute || window.DUEL_PMUTE); }
+function pEv(n) { try { if (window.DUEL_HOOK) window.DUEL_HOOK(n); } catch (e) {} }
+var gpOn = false;
+function portalTick() { var on = (G.state === 'count' || G.state === 'play' || G.state === 'rend') && !G.paused && !D.hidden; if (on !== gpOn) { gpOn = on; pEv(on ? 'start' : 'stop'); } }
 function onoff(v) { return t(v ? 'on' : 'off'); }
 
 /* ---------------- Zustand ---------------- */
@@ -184,7 +212,7 @@ function audioInit() {
  if (A.ctx) { if (A.ctx.state !== 'running') try { A.ctx.resume(); } catch (e) {} return; }
  try {
   var C = window.AudioContext || window.webkitAudioContext; if (!C) return;
-  var c = A.ctx = new C(); A.master = c.createGain(); A.master.gain.value = S.mute ? 0 : .7; A.master.connect(c.destination);
+  var c = A.ctx = new C(); A.master = c.createGain(); A.master.gain.value = muted() ? 0 : .7; A.master.connect(c.destination);
   var n = c.createBuffer(1, c.sampleRate * 1, c.sampleRate), d = n.getChannelData(0); for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; A.noise = n;
   for (var j = 0; j < 2; j++) {
    var g = c.createGain(); g.gain.value = 0; var f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 520; f.Q.value = 2;
@@ -198,15 +226,15 @@ function audioInit() {
 }
 function unlock() { audioInit(); }
 ['pointerdown', 'touchend', 'click', 'keydown'].forEach(function (e) { D.addEventListener(e, unlock, { passive: true, capture: true }); });
-function setMute() { if (A.master) A.master.gain.setTargetAtTime(S.mute ? 0 : .7, A.ctx.currentTime, .02); }
+function setMute() { if (A.master) A.master.gain.setTargetAtTime(muted() ? 0 : .7, A.ctx.currentTime, .02); }
 function env(g, t0, a, d, v) { g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v, t0 + a); g.gain.exponentialRampToValueAtTime(0.0001, t0 + a + d); }
 function tone(type, f0, f1, dur, vol) {
- if (!A.ctx || S.mute) return; var c = A.ctx, t0 = c.currentTime, o = c.createOscillator(), g = c.createGain();
+ if (!A.ctx || muted()) return; var c = A.ctx, t0 = c.currentTime, o = c.createOscillator(), g = c.createGain();
  o.type = type; o.frequency.setValueAtTime(f0, t0); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t0 + dur); env(g, t0, .005, dur, vol);
  o.connect(g); g.connect(A.master); o.start(t0); o.stop(t0 + dur + .05);
 }
 function noise(ftype, f0, f1, dur, vol, att) {
- if (!A.ctx || S.mute) return; var c = A.ctx, t0 = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+ if (!A.ctx || muted()) return; var c = A.ctx, t0 = c.currentTime, s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
  s.buffer = A.noise; s.loop = true; f.type = ftype; f.frequency.setValueAtTime(f0, t0); f.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t0 + dur); f.Q.value = 1.2;
  env(g, t0, att || .005, dur, vol); s.connect(f); f.connect(g); g.connect(A.master); s.start(t0); s.stop(t0 + dur + .1);
 }
@@ -226,12 +254,12 @@ function engines(dt) {
  for (var i = 0; i < 2; i++) {
   var e = A.eng[i], j = G.jets[i], v = 0, p = 1;
   if (on && j && j.alive) { v = G.state === 'menu' ? .015 : (G.state === 'count' ? .03 : .05); p = 1 + Math.abs(j.turn) * .06 + (j.rollT > 0 ? .3 : 0) + (j.firing ? .04 : 0); }
-  e.g.gain.setTargetAtTime(S.mute ? 0 : v, c, .08); e.o1.frequency.setTargetAtTime((58 + i * 11) * p, c, .1); e.o2.frequency.setTargetAtTime((29 + i * 5.7) * p, c, .1);
+  e.g.gain.setTargetAtTime(muted() ? 0 : v, c, .08); e.o1.frequency.setTargetAtTime((58 + i * 11) * p, c, .1); e.o2.frequency.setTargetAtTime((29 + i * 5.7) * p, c, .1);
  }
 }
 function vib(p) { if (S.vib && navigator.vibrate) try { navigator.vibrate(p); } catch (e) {} }
 var wl = null;
-function wake() { try { if (navigator.wakeLock && D.visibilityState === 'visible') navigator.wakeLock.request('screen').then(function (l) { wl = l; }, function () {}); } catch (e) {} }
+function wake() { try { if (window.self === window.top && navigator.wakeLock && D.visibilityState === 'visible') navigator.wakeLock.request('screen').then(function (l) { wl = l; }, function () {}); } catch (e) {} }
 
 /* ---------------- Sprites ---------------- */
 function jetShape(c, col) {
@@ -280,7 +308,7 @@ function drawLogo() {
 }
 
 /* ---------------- Welt ---------------- */
-function mkWorld() { G.W = clamp(Math.round(aw / .64), 340, 900); G.H = clamp(Math.round(ah / .64), 300, 1000); }
+function mkWorld() { var kb = Math.max(.64, aw / 1700, ah / 1300); G.W = clamp(Math.round(aw / kb), 340, 1700); G.H = clamp(Math.round(ah / kb), 300, 1300); }
 function starts() { var W = G.W, H = G.H; return W > H * 1.1 ? [[W * .13, H / 2, 0], [W * .87, H / 2, Math.PI]] : [[W / 2, H * .86, -Math.PI / 2], [W / 2, H * .14, Math.PI / 2]]; }
 function mkJet(i) { var st = starts()[i]; return { i: i, x: st[0], y: st[1], a: st[2], hp: 100, heat: 0, over: false, fireT: 0, missiles: 0, rapid: 0, shield: 0, rollT: 0, rollCd: 0, flT: 0, turn: 0, flash: 0, inv: 0, alive: true, firing: false, em: 0, cmd: { dir: 0, f: 0, m: 0, rl: 0 }, ai: { t: 0, diff: 0, dist: 999, burst: 0, ok: 1 }, seen: {} }; }
 function mkObstacles() {
@@ -350,7 +378,7 @@ function updP(dt) {
 }
 
 /* ---------------- Spielablauf ---------------- */
-function resetCmds() { for (var i = 0; i < 2; i++) { inp[i].dir = 0; inp[i].f = 0; inp[i].m = 0; inp[i].rl = 0; } $$('.on').forEach(function (e) { e.classList.remove('on'); }); padP = [{}, {}]; fireP = [0, 0]; }
+function resetCmds() { kd[0] = {}; kd[1] = {}; for (var i = 0; i < 2; i++) { inp[i].dir = 0; inp[i].f = 0; inp[i].m = 0; inp[i].rl = 0; } $$('.on').forEach(function (e) { e.classList.remove('on'); }); padP = [{}, {}]; fireP = [0, 0]; }
 function startMatch(ai) {
  audioInit(); G.ai = !!ai; G.score = [0, 0]; G.round = 0; G.need = S.rounds === 5 ? 3 : 2; G.last = -1;
  $('#menu').hidden = true; $('#pause').hidden = false; sides(); wake(); startRound();
@@ -370,13 +398,13 @@ function setOv(mode, ext) {
   if (mode === 'count') { h = '<div class="sub">' + t('round', { n: G.round }) + ' &nbsp;·&nbsp; ' + sc + '</div><div class="big num">' + (ext || '') + '</div>'; }
   else if (mode === 'round') { var w = G.last; h = '<div class="big ' + (w < 0 ? 'draw' : w === i ? 'win' : 'lose') + '">' + t(w < 0 ? 'rdraw' : w === i ? 'rwin' : 'rlose') + '</div><div class="sub">' + sc + '</div>'; }
   else if (mode === 'end') { cls += ' bg'; var win = G.last === i; h = '<div class="big ' + (win ? 'win' : 'lose') + '">' + t(win ? 'win' : 'lose') + '</div><div class="sub">' + sc + '</div><div class="row"><button class="ob main" data-a="rematch">' + t('rematch') + '</button><button class="ob" data-a="menu">' + t('menu') + '</button></div>'; }
-  else if (mode === 'pause') { cls += ' bg'; h = '<div class="big">' + t('pause') + '</div><div class="row"><button class="ob main" data-a="resume">' + t('resume') + '</button><button class="ob" data-a="restart">' + t('restart') + '</button><button class="ob" data-a="menu">' + t('menu') + '</button><button class="ob" data-a="snd">' + t('snd') + ': ' + onoff(!S.mute) + '</button></div>'; }
+  else if (mode === 'pause') { cls += ' bg'; h = '<div class="big">' + t('pause') + '</div><div class="row"><button class="ob main" data-a="resume">' + t('resume') + '</button><button class="ob" data-a="restart">' + t('restart') + '</button><button class="ob" data-a="menu">' + t('menu') + '</button><button class="ob" data-a="snd">' + t('snd') + ': ' + onoff(!muted()) + '</button></div>'; }
   e.className = cls; e.innerHTML = h;
  });
 }
 function endRound(w) {
  G.state = 'rend'; G.last = w; if (w >= 0) G.score[w]++; G.rendT = 2.6;
- if (w >= 0 && G.score[w] >= G.need) { G.state = 'mend'; SFX.end(true); setOv('end'); } else { setOv('round'); SFX.end(w === 0 || w === 1); }
+ if (w >= 0 && G.score[w] >= G.need) { G.state = 'mend'; SFX.end(true); setOv('end'); portalTick(); if (!G.ai) pEv('win'); } else { setOv('round'); SFX.end(w === 0 || w === 1); }
  pips();
 }
 function doPause(on) {
@@ -387,10 +415,10 @@ function toMenu() { G.state = 'menu'; G.paused = false; resetCmds(); setOv(null)
 D.addEventListener('click', function (e) {
  var b = e.target.closest && e.target.closest('[data-a]'); if (!b) return; var a = b.getAttribute('data-a');
  if (a === 'resume') doPause(false); else if (a === 'restart') { startMatch(G.ai); } else if (a === 'menu') toMenu(); else if (a === 'rematch') startMatch(G.ai);
- else if (a === 'snd') { S.mute = !S.mute; saveS(); setMute(); b.textContent = t('snd') + ': ' + onoff(!S.mute); }
+ else if (a === 'snd') { S.mute = !S.mute; saveS(); setMute(); b.textContent = t('snd') + ': ' + onoff(!muted()); }
 });
 $('#pause').addEventListener('click', function () { doPause(true); });
-D.addEventListener('visibilitychange', function () { if (D.hidden) doPause(true); else wake(); });
+D.addEventListener('visibilitychange', function () { if (D.hidden) doPause(true); else wake(); portalTick(); });
 
 /* ---------------- Spiellogik ---------------- */
 function hurt(j, amt, src) {
@@ -566,12 +594,14 @@ var IC = {
  f: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/></svg>',
  m: '<svg viewBox="0 0 24 24"><path d="M3 12h4M7 9h9l5 3-5 3H7z"/></svg>', o: '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-3-6.2M20 3.5V8h-4.5"/></svg>'
 };
+var KL = [{ l: 'A', r: 'D', f: 'W / Space', m: 'S / Shift', rl: 'Q' }, { l: '\u2190', r: '\u2192', f: '\u2191 / Enter', m: '\u2193', rl: 'R-Shift' }];
+function KH(i, c) { return '<small class="kh">' + KL[i][c] + '</small>'; }
 function buildSide(i) {
  var el = $('#side' + (i + 1));
  el.innerHTML = '<div class="hud"><span class="pips"></span><div class="bar hp"><i></i></div><div class="bar heat"><i></i><b>' + '</b></div><span class="chips"></span></div>' +
-  '<div class="panel"><div class="pad"><div class="hl">' + IC.l + '</div><div class="hr">' + IC.r + '</div></div>' +
-  '<button class="btn fire">' + IC.f + '<span data-i="fire"></span></button><button class="btn miss"><span class="cnt"></span>' + IC.m + '<span data-i="miss"></span></button>' +
-  '<button class="btn roll"><i class="cd"></i>' + IC.o + '<span data-i="roll"></span></button><div class="aimask" data-i="ai"></div></div>';
+  '<div class="panel"><div class="pad"><div class="hl">' + IC.l + KH(i, 'l') + '</div><div class="hr">' + IC.r + KH(i, 'r') + '</div></div>' +
+  '<button class="btn fire">' + IC.f + '<span data-i="fire"></span>' + KH(i, 'f') + '</button><button class="btn miss"><span class="cnt"></span>' + IC.m + '<span data-i="miss"></span>' + KH(i, 'm') + '</button>' +
+  '<button class="btn roll"><i class="cd"></i>' + IC.o + '<span data-i="roll"></span>' + KH(i, 'rl') + '</button><div class="aimask" data-i="ai"></div></div>';
  var pad = $('.pad', el), hl = $('.hl', el), hr = $('.hr', el), rot = i === 1;
  function dirOf(e) { var r = pad.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width; if (portrait() && rot) fx = 1 - fx; return fx < .5 ? -1 : 1; }
  function setDir() { var d = 0, ks = Object.keys(padP[i]); if (ks.length) d = padP[i][ks[ks.length - 1]]; inp[i].dir = d; hl.classList.toggle('on', d < 0); hr.classList.toggle('on', d > 0); }
@@ -605,7 +635,7 @@ function hud() {
 }
 function applyLang() {
  D.documentElement.lang = S.lang; $$('[data-i]').forEach(function (e) { e.textContent = t(e.getAttribute('data-i')); });
- $$('#menu [data-s]').forEach(function (b) { var s = b.getAttribute('data-s'); b.textContent = s === 'rounds' ? t('rounds', { n: S.rounds }) : s === 'lang' ? t('lang') : t(s, { v: onoff(s === 'mute' ? !S.mute : S[s]) }); });
+ $$('#menu [data-s]').forEach(function (b) { var s = b.getAttribute('data-s'); b.textContent = s === 'rounds' ? t('rounds', { n: S.rounds }) : s === 'lang' ? t('lang') : t(s, { v: onoff(s === 'mute' ? !muted() : S[s]) }); });
  if (G.state === 'count' || G.state === 'rend' || G.state === 'mend' || G.paused) { if (G.paused) setOv('pause'); else if (G.state === 'rend') setOv('round'); else if (G.state === 'mend') setOv('end'); else setOv('count', G.cdN > 0 ? G.cdN : t('go')); }
  $('#pause').setAttribute('aria-label', t('pause'));
 }
@@ -617,10 +647,18 @@ $('#menu').addEventListener('click', function (e) {
 $('#b2p').addEventListener('click', function () { startMatch(false); });
 $('#bai').addEventListener('click', function () { startMatch(true); });
 
-/* Tastatur (Test am Rechner) */
-var KEYS = { ArrowLeft: [0, 'l'], ArrowRight: [0, 'r'], ArrowUp: [0, 'f'], ArrowDown: [0, 'm'], '.': [0, 'rl'], a: [1, 'l'], d: [1, 'r'], w: [1, 'f'], s: [1, 'm'], q: [1, 'rl'] }, kd = [{}, {}];
-function key(e, dn) { var m = KEYS[e.key]; if (!m) return; e.preventDefault(); var i = m[0], c = m[1]; if (c === 'f') inp[i].f = dn ? 1 : 0; else if (c === 'm' || c === 'rl') { if (dn && !e.repeat) inp[i][c] = 1; } else { kd[i][c] = dn; inp[i].dir = (kd[i].r ? 1 : 0) - (kd[i].l ? 1 : 0); } }
-D.addEventListener('keydown', function (e) { key(e, true); if (e.key === 'Escape' || e.key === 'p') doPause(!G.paused); });
+/* Tastatur: Spieler 1 (unten/links, blau) A D W/Leertaste S/Shift Q; Spieler 2 (oben/rechts, orange) Pfeile, Enter, Rechts-Shift. P = Pause */
+var KEYS = { KeyA: [0, 'l'], KeyD: [0, 'r'], KeyW: [0, 'f'], Space: [0, 'f'], KeyS: [0, 'm'], ShiftLeft: [0, 'm'], KeyQ: [0, 'rl'],
+  ArrowLeft: [1, 'l'], ArrowRight: [1, 'r'], ArrowUp: [1, 'f'], Enter: [1, 'f'], NumpadEnter: [1, 'f'], ArrowDown: [1, 'm'], ShiftRight: [1, 'rl'] }, kd = [{}, {}];
+function key(e, dn) {
+ var m = KEYS[e.code]; if (!m) return; if (G.state === 'menu' || G.state === 'mend' || G.paused) { if (!dn) kd[m[0]][m[1]] = false; return; }
+ e.preventDefault(); var i = m[0], c = m[1]; if (!dn) { kd[i][c + (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'ShiftLeft' ? '2' : '')] = false; }
+ else kd[i][c + (e.code === 'Space' || e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'ShiftLeft' ? '2' : '')] = true;
+ if (c === 'f') inp[i].f = (kd[i].f || kd[i].f2) ? 1 : 0;
+ else if (c === 'm' || c === 'rl') { if (dn && !e.repeat) inp[i][c] = 1; }
+ else inp[i].dir = (kd[i].r ? 1 : 0) - (kd[i].l ? 1 : 0);
+}
+D.addEventListener('keydown', function (e) { if (e.ctrlKey || e.metaKey || e.altKey) return; key(e, true); if (e.code === 'KeyP' && !e.repeat) doPause(!G.paused); });
 D.addEventListener('keyup', function (e) { key(e, false); });
 D.addEventListener('touchmove', function (e) { e.preventDefault(); }, { passive: false });
 ['gesturestart', 'gesturechange', 'contextmenu', 'dblclick'].forEach(function (n) { D.addEventListener(n, function (e) { e.preventDefault(); }); });
@@ -648,15 +686,16 @@ function frame(ts) {
  requestAnimationFrame(frame);
  var t0 = performance.now(), dt = Math.min(.1, (ts - lastT) / 1000 || STEP); lastT = ts;
  if (!G.paused) { acc += dt; var n = 0; while (acc >= STEP && n < 6) { update(STEP); acc -= STEP; n++; } if (n === 6) acc = 0; }
- if (G.state !== 'menu' || true) draw(); hud(); engines(dt);
+ if (G.state !== 'menu' || true) draw(); hud(); engines(dt); portalTick();
  var w = performance.now() - t0; perf.frames++; perf.wsum += w; perf.wcnt++; if (w > perf.maxw) perf.maxw = w;
  if (perf.skip > 0) perf.skip--; else { perf.sum += w; perf.cnt++; if (perf.cnt >= 60) { perf.last = perf.sum / perf.cnt; perf.sum = 0; perf.cnt = 0; if (!perf.lock && perf.last > 9 && Q < 3) { Q++; layout(true); } } }
 }
 function init() {
- buildSide(0); buildSide(1); mkWorld(); G.jets = [mkJet(0), mkJet(1)]; applyLang(); drawLogo(); layout(true); initClouds(); sides(); requestAnimationFrame(frame);
+ buildSide(0); buildSide(1); mkWorld(); G.jets = [mkJet(0), mkJet(1)]; applyLang(); drawLogo(); layout(true); initClouds(); sides(); requestAnimationFrame(frame); pEv('ready');
  if ('serviceWorker' in navigator && location.protocol !== 'file:') window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function () {}); });
 }
-window.__duel = { hurt: hurt, kill: kill, G: G, inp: inp, S: S, perf: perf, Q: function () { return Q; }, dp: function () { return dp; }, startMatch: startMatch, doPause: doPause, toMenu: toMenu,
+window.DUEL_REFRESH = function () { try { setMute(); applyLang(); } catch (e) {} };
+window.__duel = { boom: boom, launch: launch, doRoll: doRoll, spawnPick: spawnPick, hurt: hurt, kill: kill, G: G, inp: inp, S: S, perf: perf, Q: function () { return Q; }, dp: function () { return dp; }, startMatch: startMatch, doPause: doPause, toMenu: toMenu,
  stress: function () { perf.lock = true; startMatch(false); G.state = 'play'; setOv(null); G.cdT = 0; var J = G.jets; J[0].rapid = J[1].rapid = 1e9; J[0].hp = J[1].hp = 1e9; for (var i = 0; i < 4; i++) spawnPick();
   setInterval(function () { for (var i = 0; i < 4; i++) { J[i & 1].missiles = 2; launch(J[i & 1]); J[i & 1].rollCd = 0; doRoll(J[i & 1]); J[i & 1].heat = 0; J[i & 1].over = false; boom(80 + i * 70, 200 + (i & 1) * 90, true); } if (G.pk.length < 4) spawnPick(); }, 600);
   inp[0].f = inp[1].f = 1; } };
