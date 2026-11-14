@@ -126,6 +126,7 @@ button{font:inherit;color:inherit;touch-action:none}
     <div class="set">
       <button data-s="rounds"></button><button data-s="mute"></button>
       <button data-s="shake"></button><button data-s="vib"></button>
+      <button data-s="isl" style="grid-column:1/-1"></button>
       <button data-s="lang" style="grid-column:1/-1"></button>
     </div>
     <div class="how" data-i="how"></div>
@@ -146,19 +147,19 @@ function rng(s) { return function () { s |= 0; s = s + 0x6D2B79F5 | 0; var t = M
 var TXT = {
  de: { tag: 'Zwei Piloten, ein Handy.', play2: '2 Spieler', train: 'Üben (gegen KI)',
   how: 'Handy zwischen euch legen. Blau spielt unten, Orange oben. Lenken, Feuer halten, Rakete oder Rolle (Täuschkörper). Die Kanone überhitzt!',
-  rounds: 'Bestes aus {n}', mute: 'Ton: {v}', shake: 'Wackeln: {v}', vib: 'Vibration: {v}', lang: 'Sprache: Deutsch (tippen für English)', on: 'an', off: 'aus',
+  rounds: 'Bestes aus {n}', isl: 'Inseln und Berge: {v}', mute: 'Ton: {v}', shake: 'Wackeln: {v}', vib: 'Vibration: {v}', lang: 'Sprache: Deutsch (tippen für English)', on: 'an', off: 'aus',
   fire: 'FEUER', miss: 'RAKETE', roll: 'ROLLE', heat: 'HITZE', over: 'ÜBERHITZT', ai: 'KI',
   go: 'LOS!', round: 'Runde {n}', pause: 'Pause', resume: 'Weiter', restart: 'Neustart', menu: 'Menü', snd: 'Ton',
   rwin: 'Punkt!', rlose: 'Runde verloren', rdraw: 'Unentschieden', win: 'SIEG!', lose: 'Niederlage', rematch: 'Revanche', first: 'Wer zuerst {n} Runden gewinnt' },
  en: { tag: 'Two pilots, one phone.', play2: '2 Players', train: 'Practice (vs AI)',
   how: 'Lay the phone between you. Blue plays at the bottom, orange at the top. Steer, hold fire, missile or roll (flares). The cannon overheats!',
-  rounds: 'Best of {n}', mute: 'Sound: {v}', shake: 'Screen shake: {v}', vib: 'Vibration: {v}', lang: 'Language: English (tap for Deutsch)', on: 'on', off: 'off',
+  rounds: 'Best of {n}', isl: 'Islands and mountains: {v}', mute: 'Sound: {v}', shake: 'Screen shake: {v}', vib: 'Vibration: {v}', lang: 'Language: English (tap for Deutsch)', on: 'on', off: 'off',
   fire: 'FIRE', miss: 'MISSILE', roll: 'ROLL', heat: 'HEAT', over: 'OVERHEAT', ai: 'AI',
   go: 'GO!', round: 'Round {n}', pause: 'Paused', resume: 'Resume', restart: 'Restart', menu: 'Menu', snd: 'Sound',
   rwin: 'Point!', rlose: 'Round lost', rdraw: 'Draw', win: 'VICTORY!', lose: 'Defeat', rematch: 'Rematch', first: 'First to {n} rounds wins' }
 };
-var S = { lang: ((navigator.language || navigator.userLanguage || 'en') + '').toLowerCase().indexOf('de') === 0 ? 'de' : 'en', mute: false, shake: true, vib: true, rounds: 3 };
-try { var sv = JSON.parse(localStorage.getItem('duell-v1') || '{}'); if (sv.lang === 'de' || sv.lang === 'en') S.lang = sv.lang; if (typeof sv.mute === 'boolean') S.mute = sv.mute; if (typeof sv.shake === 'boolean') S.shake = sv.shake; if (typeof sv.vib === 'boolean') S.vib = sv.vib; if (sv.rounds === 5) S.rounds = 5; } catch (e) {}
+var S = { lang: ((navigator.language || navigator.userLanguage || 'en') + '').toLowerCase().indexOf('de') === 0 ? 'de' : 'en', mute: false, shake: true, vib: true, isl: true, rounds: 3 };
+try { var sv = JSON.parse(localStorage.getItem('duell-v1') || '{}'); if (sv.lang === 'de' || sv.lang === 'en') S.lang = sv.lang; if (typeof sv.mute === 'boolean') S.mute = sv.mute; if (typeof sv.shake === 'boolean') S.shake = sv.shake; if (typeof sv.vib === 'boolean') S.vib = sv.vib; if (typeof sv.isl === 'boolean') S.isl = sv.isl; if (sv.rounds === 5) S.rounds = 5; } catch (e) {}
 function saveS() { try { localStorage.setItem('duell-v1', JSON.stringify(S)); } catch (e) {} }
 function t(k, o) { var s = (TXT[S.lang] || TXT.en)[k]; if (s === undefined) s = TXT.en[k]; if (s === undefined) return k; if (o) for (var x in o) s = s.replace('{' + x + '}', o[x]); return s; }
 function onoff(v) { return t(v ? 'on' : 'off'); }
@@ -283,6 +284,7 @@ function mkWorld() { G.W = clamp(Math.round(aw / .64), 340, 900); G.H = clamp(Ma
 function starts() { var W = G.W, H = G.H; return W > H * 1.1 ? [[W * .13, H / 2, 0], [W * .87, H / 2, Math.PI]] : [[W / 2, H * .86, -Math.PI / 2], [W / 2, H * .14, Math.PI / 2]]; }
 function mkJet(i) { var st = starts()[i]; return { i: i, x: st[0], y: st[1], a: st[2], hp: 100, heat: 0, over: false, fireT: 0, missiles: 0, rapid: 0, shield: 0, rollT: 0, rollCd: 0, flT: 0, turn: 0, flash: 0, inv: 0, alive: true, firing: false, em: 0, cmd: { dir: 0, f: 0, m: 0, rl: 0 }, ai: { t: 0, diff: 0, dist: 999, burst: 0, ok: 1 }, seen: {} }; }
 function mkObstacles() {
+ if (!S.isl) return [];
  var W = G.W, H = G.H, r = rng((Math.random() * 1e9) | 0), ob = [], st = starts(), area = W * H, pairs = area > 330000 ? 2 : 1, tries = 0;
  function ok(x, y, rad) {
   for (var s = 0; s < 2; s++) if (Math.hypot(x - st[s][0], y - st[s][1]) < rad + 110) return false;

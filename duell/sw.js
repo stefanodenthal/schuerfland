@@ -1,5 +1,5 @@
 // Düsenduell: eigener Offline-Speicher (Scope nur /duell/). Cache-Name beginnt bewusst nicht mit "schuerfland-".
-const CACHE = 'duell-def83901';
+const CACHE = 'duell-676283c3';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png', './icons/favicon-32.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
